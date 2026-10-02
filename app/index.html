@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#181a21">
+<title>micro:bit RC Pad</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header id="bar">
+  <button id="connect" class="primary">Connect</button>
+  <span id="dot" class="dot" title="Bluetooth"></span>
+  <span id="devname">Not connected</span>
+  <span id="tx" class="mono"></span>
+  <span class="grow"></span>
+  <span id="edittools" hidden>
+    <select id="add" aria-label="Add widget">
+      <option value="">+ Add…</option>
+      <option value="button">Button</option>
+      <option value="toggle">Toggle switch</option>
+      <option value="slider">Slider (linear pot)</option>
+      <option value="joystick">Joystick</option>
+      <option value="display">Display</option>
+    </select>
+    <button id="export">Export</button>
+    <label class="btn">Import<input id="import" type="file" accept=".json,application/json" hidden></label>
+    <button id="reset">Reset</button>
+  </span>
+  <button id="edit">Edit</button>
+  <button id="fs" title="Fullscreen" aria-label="Fullscreen">⛶</button>
+</header>
+<main id="stage"></main>
+<aside id="panel" hidden></aside>
+<script type="module" src="app.js"></script>
+</body>
+</html>
