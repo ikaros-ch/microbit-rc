@@ -3,3 +3,7 @@ pxt_modules/
 node_modules/
 .remember/
 *.hex
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties

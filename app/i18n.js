@@ -15,6 +15,7 @@ const STR = {
   export: ['Export', 'Εξαγωγή'],
   import: ['Import', 'Εισαγωγή'],
   reset: ['Reset', 'Επαναφορά'],
+  rotate: ['Rotate 90°', 'Περιστροφή 90°'],
   fullscreen: ['Fullscreen', 'Πλήρης οθόνη'],
   channel: ['Channel (name used in gamepad.show)', 'Κανάλι (όνομα στο gamepad.show)'],
   showAs: ['Show as', 'Εμφάνιση ως'],

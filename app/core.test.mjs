@@ -1,6 +1,6 @@
 // Run: node app/core.test.mjs
 import assert from 'node:assert/strict';
-import { encode, pack, splitLines, parseData, readBinding, step, cleanId } from './core.js';
+import { encode, pack, splitLines, parseData, readBinding, step, cleanId, unrotate } from './core.js';
 
 assert.equal(encode('J', 'L', [-50, 30]), 'JL=-50,30');
 // Greek is 2 bytes/char: packets stay <= 20 bytes and reassemble exactly
@@ -50,5 +50,11 @@ const j = { type: 'joystick', up: ['KeyW'], down: [], left: [], right: ['KeyD'] 
 assert.deepEqual(step(j, js, keys, null, 0), [71, 71]);
 js.touch = true; js.tx = -1; js.ty = 0;
 assert.deepEqual(step(j, js, keys, null, 0), [-100, 0]);
+
+// unrotate inverts the CSS transforms: box W x H, its point (x, y) lands on screen at rot(x, y)
+const W = 800, H = 400;
+const css = { 0: (x, y) => [x, y], 90: (x, y) => [H - y, x], 180: (x, y) => [W - x, H - y], 270: (x, y) => [y, W - x] };
+for (const r of [0, 90, 180, 270]) for (const p of [[0, 0], [800, 400], [123, 45]])
+  assert.deepEqual(unrotate(r, W, H, ...css[r](...p)), p, 'rot ' + r);
 
 console.log('core ok');

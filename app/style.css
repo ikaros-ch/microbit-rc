@@ -124,3 +124,11 @@ button:hover, .btn:hover { border-color: var(--mut); }
 }
 .horiz .aknob { width: auto; height: 130%; }
 .row input[type=checkbox] { width: 20px; height: 20px; }
+
+/* Rotation: #app is a fixed box turned around its top-left corner. A transformed
+   ancestor contains position:fixed children, so bar/stage/panel follow it. */
+#app { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh; transform-origin: 0 0; }
+#app.rot90, #app.rot270 { width: 100vh; width: 100dvh; height: 100vw; }
+#app.rot90 { transform: rotate(90deg) translateY(-100%); }
+#app.rot180 { transform: rotate(180deg) translate(-100%, -100%); }
+#app.rot270 { transform: rotate(270deg) translateX(-100%); }

@@ -7,6 +7,7 @@ A customizable Bluetooth gamepad for the BBC micro:bit, inspired by
 It has two parts:
 
 * **The web app** (`app/`): runs in Chrome/Edge on a phone, tablet or PC. **[Open the app](https://ikaros-ch.github.io/microbit-rc/)**
+* **Android app**: `rc-pad.apk` on the [latest release](https://github.com/ikaros-ch/microbit-rc/releases/latest) opens the same app full screen. It needs Chrome installed, see [Android app](#android-app).
 * **The MakeCode extension** (this repo's root): adds a **Gamepad** block category to MakeCode.
 
 ## Features
@@ -24,6 +25,7 @@ It has two parts:
 * **Bindings**: press **+ Bind**, then press a key, a controller button or move a stick. You can bind as many inputs to one widget as you like, and touch always works too.
 * **Controllers** use the browser Gamepad API (Xbox, PlayStation and most USB/Bluetooth pads). Plug one in and press any button so the browser detects it.
 * **Greek / English**: the app follows your browser language, or pick **EN / ΕΛ** in the toolbar. The MakeCode blocks are translated too, so switch MakeCode to Ελληνικά. Display texts, labels, IDs and channel names can all be Greek.
+* **⟳ Rotate**: turns the whole app 90° per press, so you can hold a phone sideways while the browser stays in portrait (or the other way round). Touch, dragging and resizing work at every angle, and the app remembers your choice.
 * **Layouts** are saved in the browser. Use **Export** / **Import** to back them up or share them as JSON files.
 
 ## MakeCode extension
@@ -62,6 +64,15 @@ A demo `.hex` that matches the app's default layout is attached to each [release
 * The extension uses the Bluetooth UART receive handler, so don't add your own `on bluetooth data received` block.
 * IDs and channel names can only use letters (Greek too), digits and `_`, with at most 8 characters.
 * Texts can be any length and any language. They are UTF-8 and split into 20-byte Bluetooth packets, which the app joins back together.
+
+## Android app
+
+The APK is a [Trusted Web Activity](https://developer.chrome.com/docs/android/trusted-web-activity): it opens the site full screen through Chrome. A plain Android WebView can't be used because it doesn't support Web Bluetooth.
+
+* Install `rc-pad.apk` from the release page. You may need to allow installs from unknown sources.
+* The app always loads the live site, so app updates arrive without a new APK.
+* A thin URL bar may show at the top. Hiding it needs a `/.well-known/assetlinks.json` file on `ikaros-ch.github.io` with the APK's signing fingerprint.
+* `android/` holds the project. CI builds it on every change and attaches it to each release.
 
 ## Protocol
 

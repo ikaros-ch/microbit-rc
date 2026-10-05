@@ -1,4 +1,4 @@
-import { clamp, encode, pack, splitLines, parseData, step, cleanId } from './core.js';
+import { clamp, encode, pack, splitLines, parseData, step, cleanId, unrotate } from './core.js';
 import { t, lang, setLang, applyStatic } from './i18n.js';
 
 const UART = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
@@ -12,14 +12,10 @@ const STORE = 'rcpad.layout';
 
 const defaults = () => ({ widgets: [
   { type: 'toggle', id: 'T1', label: t('lights'), x: 2, y: 2, w: 11, h: 18, bind: ['Digit1', 'pad:b4'] },
-  { type: 'toggle', id: 'T2', label: 'Turbo', x: 14, y: 2, w: 11, h: 18, bind: ['Digit2', 'pad:b5'] },
-  { type: 'display', channel: 'msg', label: t('status'), mode: 'text', x: 28, y: 2, w: 28, h: 18 },
-  { type: 'display', channel: 'speed', label: t('speedLbl'), mode: 'bar', min: 0, max: 100, x: 58, y: 2, w: 16, h: 18 },
-  { type: 'display', channel: 'temp', label: t('temp'), mode: 'graph', min: 0, max: 40, unit: '°C', x: 76, y: 2, w: 14, h: 18 },
-  { type: 'display', channel: 'lamp', label: 'B', mode: 'lamp', x: 91, y: 2, w: 7, h: 18 },
-  { type: 'joystick', id: 'L', x: 1, y: 30, w: 24, h: 66, up: ['KeyW', 'pad:a1-'], down: ['KeyS', 'pad:a1+'], left: ['KeyA', 'pad:a0-'], right: ['KeyD', 'pad:a0+'] },
-  { type: 'slider', id: 'S', label: t('throttle'), color: '#ff9f43', x: 27, y: 30, w: 7, h: 66, up: ['KeyR', 'pad:b7'], down: ['KeyF', 'pad:b6'], speed: 100 },
-  { type: 'joystick', id: 'R', color: '#00c2ff', x: 36, y: 30, w: 24, h: 66, up: ['ArrowUp', 'pad:a3-'], down: ['ArrowDown', 'pad:a3+'], left: ['ArrowLeft', 'pad:a2-'], right: ['ArrowRight', 'pad:a2+'] },
+  { type: 'display', channel: 'msg', label: t('status'), mode: 'text', x: 38, y: 3, w: 28, h: 18 },
+  { type: 'toggle', id: 'T2', label: 'Turbo', x: 88.5, y: 1.5, w: 11, h: 18, bind: ['Digit2', 'pad:b5'] },
+  { type: 'joystick', id: 'L', x: 2, y: 30, w: 24, h: 66, up: ['KeyW', 'pad:a1-'], down: ['KeyS', 'pad:a1+'], left: ['KeyA', 'pad:a0-'], right: ['KeyD', 'pad:a0+'] },
+  { type: 'slider', id: 'S', label: t('throttle'), color: '#ff9f43', x: 46, y: 30.5, w: 7, h: 66, up: ['KeyR', 'pad:b7'], down: ['KeyF', 'pad:b6'], speed: 100 },
   { type: 'button', id: 'Y', color: '#f6c343', x: 76, y: 32, w: 10, h: 19, bind: ['KeyI', 'pad:b3'] },
   { type: 'button', id: 'X', color: '#00c2ff', x: 65, y: 53, w: 10, h: 19, bind: ['KeyJ', 'pad:b2'] },
   { type: 'button', id: 'B', color: '#ff5c7a', x: 87, y: 53, w: 10, h: 19, bind: ['KeyL', 'pad:b1'] },
@@ -43,6 +39,24 @@ const data = {}, hist = {};    // channel -> latest value / numeric history
 const pending = new Map();     // coalesced outgoing lines, newest value per widget wins
 let layout, editing = false, selected = null, listening = null;
 let device = null, rxChar = null, rxBuf = '', busy = false;
+
+// Rotation: #app is turned by CSS; pointer coords are mapped back into its unrotated frame.
+const root = $('#app');
+let rot = 0;
+try { const r = +localStorage.getItem('rcpad.rot'); if ([90, 180, 270].includes(r)) rot = r; } catch {}
+const toLocal = (x, y) => unrotate(rot, root.offsetWidth, root.offsetHeight, x, y);
+// Bounding box of an element in app coordinates (exact for multiples of 90°).
+function localRect(e) {
+  const r = e.getBoundingClientRect();
+  const [x1, y1] = toLocal(r.left, r.top), [x2, y2] = toLocal(r.right, r.bottom);
+  const left = Math.min(x1, x2), top = Math.min(y1, y2), width = Math.abs(x2 - x1), height = Math.abs(y2 - y1);
+  return { left, top, width, height, right: left + width, bottom: top + height };
+}
+function applyRot() {
+  root.className = 'rot' + rot;
+  try { localStorage.setItem('rcpad.rot', rot); } catch {}
+  render();
+}
 
 const uid = () => Math.random().toString(36).slice(2, 10);
 const state = w => st.get(w.uid) || (st.set(w.uid, {}), st.get(w.uid));
@@ -171,18 +185,19 @@ function press(ev, w, e) {
   e.setPointerCapture(ev.pointerId);
   if (w.type === 'toggle') { s.on = !s.on; return; }
   const move = m => {
+    const [px, py] = toLocal(m.clientX, m.clientY);
     if (w.type === 'slider') {
-      const r = e.querySelector('.track').getBoundingClientRect();
-      s.v = clamp(e.classList.contains('horiz') ? (m.clientX - r.left) / r.width * 100 : (r.bottom - m.clientY) / r.height * 100, 0, 100);
+      const r = localRect(e.querySelector('.track'));
+      s.v = clamp(e.classList.contains('horiz') ? (px - r.left) / r.width * 100 : (r.bottom - py) / r.height * 100, 0, 100);
     }
     if (w.type === 'axis') {
-      const r = e.querySelector('.track').getBoundingClientRect();
-      const d = e.classList.contains('horiz') ? (m.clientX - r.left - r.width / 2) / (r.width * 0.4) : (r.top + r.height / 2 - m.clientY) / (r.height * 0.4);
+      const r = localRect(e.querySelector('.track'));
+      const d = e.classList.contains('horiz') ? (px - r.left - r.width / 2) / (r.width * 0.4) : (r.top + r.height / 2 - py) / (r.height * 0.4);
       s.v = clamp(d, -1, 1) * 100;
     }
     if (w.type === 'joystick') {
-      const r = e.querySelector('.base').getBoundingClientRect(), rad = r.width / 2;
-      let x = (m.clientX - r.left - rad) / rad, y = (r.top + rad - m.clientY) / rad;
+      const r = localRect(e.querySelector('.base')), rad = r.width / 2;
+      let x = (px - r.left - rad) / rad, y = (r.top + rad - py) / rad;
       const mag = Math.hypot(x, y);
       if (mag > 1) { x /= mag; y /= mag; }
       s.tx = x; s.ty = y;
@@ -198,13 +213,14 @@ function press(ev, w, e) {
 
 function drag(ev, w, e) {
   select(w);
-  const r = stage.getBoundingClientRect();
+  const r = localRect(stage);
   const resize = ev.target.classList.contains('handle');
-  const ox = ev.clientX, oy = ev.clientY, start = { ...w };
+  const [ox, oy] = toLocal(ev.clientX, ev.clientY), start = { ...w };
   const snap = v => Math.round(v * 2) / 2;
   e.setPointerCapture(ev.pointerId);
   e.onpointermove = m => {
-    const dx = (m.clientX - ox) / r.width * 100, dy = (m.clientY - oy) / r.height * 100;
+    const [mx, my] = toLocal(m.clientX, m.clientY);
+    const dx = (mx - ox) / r.width * 100, dy = (my - oy) / r.height * 100;
     if (resize) {
       w.w = clamp(snap(start.w + dx), 3, 100 - w.x);
       w.h = clamp(snap(start.h + dy), 3, 100 - w.y);
@@ -346,6 +362,7 @@ function setEditing(on) {
 }
 
 $('#edit').onclick = () => setEditing(!editing);
+$('#rot').onclick = () => { rot = (rot + 90) % 360; applyRot(); };
 $('#add').onchange = e => {
   const type = e.target.value;
   e.target.value = '';
@@ -487,4 +504,5 @@ $('#lang').onchange = e => { setLang(e.target.value); applyStatic(); showConn();
 applyStatic();
 showConn();
 setEditing(false);
+applyRot();
 requestAnimationFrame(frame);

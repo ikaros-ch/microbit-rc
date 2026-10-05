@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<div id="app">
 <header id="bar">
   <button id="connect" class="primary">Connect</button>
   <span id="dot" class="dot" title="Bluetooth"></span>
@@ -33,10 +34,12 @@
     <option value="en">EN</option>
     <option value="el">ΕΛ</option>
   </select>
+  <button id="rot" data-i18n-title="rotate">⟳</button>
   <button id="fs" data-i18n-title="fullscreen">⛶</button>
 </header>
 <main id="stage"></main>
 <aside id="panel" hidden></aside>
+</div>
 <script type="module" src="app.js"></script>
 </body>
 </html>

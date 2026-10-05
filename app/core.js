@@ -20,6 +20,11 @@ export function pack(lines, max = MAX_PACKET) {
 // Widget IDs / channel names: any letters (Greek too), digits, _; max 8 characters.
 export const cleanId = v => [...String(v).replace(/[^\p{L}\p{N}_]/gu, '')].slice(0, 8).join('');
 
+// Screen point -> point in a W x H box rotated clockwise by rot (see #app.rotN in style.css).
+export function unrotate(rot, W, H, x, y) {
+  return rot === 90 ? [y, H - x] : rot === 180 ? [W - x, H - y] : rot === 270 ? [W - y, x] : [x, y];
+}
+
 // Split a receive buffer into complete lines plus the unfinished remainder.
 export function splitLines(buf) {
   const parts = buf.split('\n');

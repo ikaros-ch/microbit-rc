@@ -1,0 +1,42 @@
+plugins {
+    id 'com.android.application'
+}
+
+// Release signing comes from env vars (CI secrets); without them the debug key is used.
+def ks = System.getenv('ANDROID_KEYSTORE')
+
+android {
+    namespace 'io.github.ikaros_ch.rcpad'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'io.github.ikaros_ch.rcpad'
+        minSdk 26
+        targetSdk 35
+        versionCode((project.findProperty('versionCode') ?: '1') as int)
+        versionName project.findProperty('versionName') ?: '1.0'
+    }
+
+    signingConfigs {
+        release {
+            if (ks) {
+                storeFile file(ks)
+                storeType 'pkcs12'
+                storePassword System.getenv('ANDROID_KEYSTORE_PASSWORD')
+                keyAlias 'rcpad'
+                keyPassword System.getenv('ANDROID_KEYSTORE_PASSWORD')
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig ks ? signingConfigs.release : signingConfigs.debug
+        }
+    }
+}
+
+dependencies {
+    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.5.0'
+}

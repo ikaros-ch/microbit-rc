@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">RC Pad</string>
+    <string name="url">https://ikaros-ch.github.io/microbit-rc/</string>
+    <string name="asset_statements" translatable="false">[{\"relation\": [\"delegate_permission/common.handle_all_urls\"], \"target\": {\"namespace\": \"web\", \"site\": \"https://ikaros-ch.github.io\"}}]</string>
+    <color name="bg">#181A21</color>
+</resources>
