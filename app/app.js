@@ -4,8 +4,8 @@ import { t, lang, setLang, applyStatic } from './i18n.js';
 const UART = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
 const UART_TX = '6e400002-b5a3-f393-e0a9-e50e24dcca9e'; // micro:bit -> app (indicate)
 const UART_RX = '6e400003-b5a3-f393-e0a9-e50e24dcca9e'; // app -> micro:bit (write)
-const PREFIX = { button: 'B', toggle: 'T', slider: 'S', joystick: 'J' };
-const BINDS = { button: ['bind'], toggle: ['bind'], slider: ['up', 'down'], joystick: ['up', 'down', 'left', 'right'] };
+const PREFIX = { button: 'B', toggle: 'T', slider: 'S', axis: 'A', joystick: 'J' };
+const BINDS = { button: ['bind'], toggle: ['bind'], slider: ['up', 'down'], axis: ['pos', 'neg'], joystick: ['up', 'down', 'left', 'right'] };
 const PAD_NAMES = ['A', 'B', 'X', 'Y', 'LB', 'RB', 'LT', 'RT', 'Back', 'Start', 'LS', 'RS', 'D↑', 'D↓', 'D←', 'D→', 'Home'];
 const AXIS_NAMES = ['LX', 'LY', 'RX', 'RY'];
 const STORE = 'rcpad.layout';
@@ -30,6 +30,7 @@ const NEW = {
   button: { w: 9, h: 16, bind: [] },
   toggle: { w: 11, h: 16, bind: [] },
   slider: { w: 7, h: 45, up: [], down: [], speed: 100 },
+  axis: { w: 7, h: 45, pos: [], neg: [], spring: true, speed: 100 },
   joystick: { w: 22, h: 50, up: [], down: [], left: [], right: [] },
   display: { w: 18, h: 16, mode: 'text', min: 0, max: 100 },
 };
@@ -94,6 +95,11 @@ function render() {
       if (w.w * W > w.h * H) e.classList.add('horiz');
       face.append(track, el('span', 'lbl', name));
     }
+    if (w.type === 'axis') {
+      const track = el('div', 'track atrack'); track.append(el('div', 'aknob'));
+      if (w.w * W > w.h * H) e.classList.add('horiz');
+      face.append(track, el('span', 'lbl', name));
+    }
     if (w.type === 'joystick') {
       const base = el('div', 'base'); base.append(el('div', 'knob'));
       const size = Math.max(20, Math.min(w.w * W, w.h * H) / 100 - 24);
@@ -119,6 +125,10 @@ function paint(w, s, v) {
   if (w.type === 'slider') {
     const f = e.querySelector('.fill');
     if (e.classList.contains('horiz')) f.style.width = v + '%'; else f.style.height = v + '%';
+  }
+  if (w.type === 'axis') {
+    const k = e.querySelector('.aknob');
+    if (e.classList.contains('horiz')) k.style.left = 50 + v * 0.4 + '%'; else k.style.top = 50 - v * 0.4 + '%';
   }
   if (w.type === 'joystick') e.querySelector('.knob').style.transform = `translate(${v[0] * 0.69}%, ${-v[1] * 0.69}%)`;
 }
@@ -164,6 +174,11 @@ function press(ev, w, e) {
     if (w.type === 'slider') {
       const r = e.querySelector('.track').getBoundingClientRect();
       s.v = clamp(e.classList.contains('horiz') ? (m.clientX - r.left) / r.width * 100 : (r.bottom - m.clientY) / r.height * 100, 0, 100);
+    }
+    if (w.type === 'axis') {
+      const r = e.querySelector('.track').getBoundingClientRect();
+      const d = e.classList.contains('horiz') ? (m.clientX - r.left - r.width / 2) / (r.width * 0.4) : (r.top + r.height / 2 - m.clientY) / (r.height * 0.4);
+      s.v = clamp(d, -1, 1) * 100;
     }
     if (w.type === 'joystick') {
       const r = e.querySelector('.base').getBoundingClientRect(), rad = r.width / 2;
@@ -270,7 +285,14 @@ function renderPanel() {
   const c = input(w, 'color', 'color');
   c.value = w.color || '#7c5cff';
   row(t('color'), c);
-  if (w.type === 'slider') row(t('speed'), input(w, 'speed', 'number'));
+  if (w.type === 'axis') {
+    const cb = el('input');
+    cb.type = 'checkbox';
+    cb.checked = w.spring !== false;
+    cb.onchange = () => { w.spring = cb.checked; save(); renderPanel(); };
+    row(t('spring'), cb);
+  }
+  if (w.type === 'slider' || (w.type === 'axis' && w.spring === false)) row(t('speed'), input(w, 'speed', 'number'));
 
   for (const key of BINDS[w.type] || []) {
     const box = el('div', 'chips');

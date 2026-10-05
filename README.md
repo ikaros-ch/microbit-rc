@@ -16,6 +16,7 @@ It has two parts:
 | **Button** | 1 while held, 0 when released | any keys and pad buttons/axes |
 | **Toggle switch** | flips between 0 and 1 on each press | any keys and pad buttons |
 | **Slider** (linear pot) | 0–100, stays where you leave it | keys/pad buttons move it up or down, analog triggers move it in proportion |
+| **Single-axis stick** (drone-style gimbal) | -100 to 100. Springs back to center, or turn spring-back off so it holds position like a throttle stick | +/− bindings: pad sticks are analog, keys move it fully (or ramp it when spring-back is off) |
 | **Joystick** (thumbstick) | x, y from -100 to 100, springs back to the center | separate up/down/left/right bindings, pad sticks are analog |
 | **Display** | shows data the micro:bit sends as text, bar, graph or lamp | – |
 
@@ -47,7 +48,7 @@ basic.forever(function () {
 | `on gamepad button "A" pressed/released` | runs when a button widget goes down or up |
 | `on gamepad "S" changed` | runs when any widget with that ID changes |
 | `gamepad "T1" is on` | true while a button is held or a toggle is on |
-| `gamepad "S" value` | slider position 0–100 (0/1 for buttons and toggles) |
+| `gamepad "S" value` | slider 0–100, single-axis stick -100..100 (0/1 for buttons and toggles) |
 | `gamepad joystick "L" x/y` | -100..100, right and up are positive |
 | `gamepad display "speed" show 42` | shows a number on every display widget set to channel `speed` |
 | `gamepad display "msg" show text "hi"` | shows text the same way |
@@ -72,6 +73,7 @@ Messages are UTF-8 text lines, ending in `
 | app → micro:bit | `B<id>=0\|1` | button |
 | app → micro:bit | `T<id>=0\|1` | toggle |
 | app → micro:bit | `S<id>=0..100` | slider |
+| app → micro:bit | `A<id>=-100..100` | single-axis stick |
 | app → micro:bit | `J<id>=<x>,<y>` | joystick, -100..100 |
 | micro:bit → app | `D<channel>=<value>` | display data |
 

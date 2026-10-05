@@ -45,7 +45,7 @@ namespace gamepad {
         return i
     }
 
-    // "BA=1", "TT1=0", "SS=42", "JL=-50,30"
+    // "BA=1", "TT1=0", "SS=42", "AYaw=-80", "JL=-50,30"
     function handle(line: string) {
         const eq = line.indexOf("=")
         if (eq < 2) return
@@ -139,7 +139,7 @@ namespace gamepad {
     }
 
     /**
-     * Slider position 0..100 (or 0/1 for buttons and toggles).
+     * Slider position 0..100, single-axis stick -100..100 (up/right positive), or 0/1 for buttons and toggles.
      * @param id the widget ID set in the app, eg: "S"
      */
     //% blockId=gamepad_value block="gamepad $id value"

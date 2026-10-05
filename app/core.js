@@ -68,6 +68,11 @@ export function step(w, s, keys, pad, dt) {
       if (!s.touch) s.v = clamp(s.v + (any(w.up, keys, pad) - any(w.down, keys, pad)) * (w.speed ?? 100) * dt, 0, 100);
       return Math.round(s.v);
     }
+    case 'axis': { // single-axis stick, -100..100; s.v is set directly while touched
+      const r = any(w.pos, keys, pad) - any(w.neg, keys, pad);
+      if (!s.touch) s.v = w.spring === false ? clamp((s.v ?? 0) + r * (w.speed ?? 100) * 2 * dt, -100, 100) : r * 100;
+      return Math.round(s.v ?? 0) || 0;
+    }
     case 'joystick': {
       let x, y;
       if (s.touch) { x = s.tx; y = s.ty; }

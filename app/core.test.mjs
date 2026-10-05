@@ -34,6 +34,17 @@ const sl = { type: 'slider', up: ['KeyW'], down: [], speed: 100 }, ss = {};
 assert.equal(step(sl, ss, keys, null, 0.5), 50);
 assert.equal(step(sl, ss, keys, null, 1), 100);
 
+// single-axis stick: springs to center by default, holds position with spring off
+const ax = { type: 'axis', pos: ['KeyW'], neg: [] }, as = {};
+assert.equal(step(ax, as, keys, null, 0), 100);
+assert.equal(step(ax, as, new Set(), null, 0), 0);
+as.touch = true; as.v = -40;
+assert.equal(step(ax, as, new Set(), null, 0), -40);
+const th = { type: 'axis', pos: ['KeyW'], neg: [], spring: false, speed: 100 }, ths = {};
+assert.equal(step(th, ths, keys, null, 0.25), 50);
+assert.equal(step(th, ths, new Set(), null, 1), 50);
+assert.equal(step(th, ths, keys, null, 1), 100);
+
 // joystick: keyboard diagonal is normalized, touch overrides
 const j = { type: 'joystick', up: ['KeyW'], down: [], left: [], right: ['KeyD'] }, js = {};
 assert.deepEqual(step(j, js, keys, null, 0), [71, 71]);
