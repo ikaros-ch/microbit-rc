@@ -1,0 +1,17 @@
+{
+  "GamepadAxis.X|block": "x",
+  "GamepadAxis.Y|block": "y",
+  "GamepadButtonEvent.Pressed|block": "πατηθεί",
+  "GamepadButtonEvent.Released|block": "αφεθεί",
+  "gamepad|block": "Gamepad",
+  "{id:category}Gamepad": "Gamepad",
+  "{id:group}Inputs": "Είσοδοι",
+  "{id:group}Display": "Οθόνη",
+  "gamepad.onButton|block": "όταν το κουμπί gamepad $id $event",
+  "gamepad.onChange|block": "όταν αλλάξει το gamepad $id",
+  "gamepad.isOn|block": "gamepad $id είναι ενεργό",
+  "gamepad.value|block": "τιμή gamepad $id",
+  "gamepad.joystick|block": "gamepad joystick $id $axis",
+  "gamepad.show|block": "οθόνη gamepad $channel δείξε $value",
+  "gamepad.showText|block": "οθόνη gamepad $channel δείξε κείμενο $text"
+}

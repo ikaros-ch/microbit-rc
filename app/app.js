@@ -1,4 +1,5 @@
-import { clamp, encode, pack, splitLines, parseData, step } from './core.js';
+import { clamp, encode, pack, splitLines, parseData, step, cleanId } from './core.js';
+import { t, lang, setLang, applyStatic } from './i18n.js';
 
 const UART = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
 const UART_TX = '6e400002-b5a3-f393-e0a9-e50e24dcca9e'; // micro:bit -> app (indicate)
@@ -9,21 +10,21 @@ const PAD_NAMES = ['A', 'B', 'X', 'Y', 'LB', 'RB', 'LT', 'RT', 'Back', 'Start', 
 const AXIS_NAMES = ['LX', 'LY', 'RX', 'RY'];
 const STORE = 'rcpad.layout';
 
-const DEFAULT = { widgets: [
-  { type: 'toggle', id: 'T1', label: 'Lights', x: 2, y: 2, w: 11, h: 18, bind: ['Digit1', 'pad:b4'] },
+const defaults = () => ({ widgets: [
+  { type: 'toggle', id: 'T1', label: t('lights'), x: 2, y: 2, w: 11, h: 18, bind: ['Digit1', 'pad:b4'] },
   { type: 'toggle', id: 'T2', label: 'Turbo', x: 14, y: 2, w: 11, h: 18, bind: ['Digit2', 'pad:b5'] },
-  { type: 'display', channel: 'msg', label: 'Status', mode: 'text', x: 28, y: 2, w: 28, h: 18 },
-  { type: 'display', channel: 'speed', label: 'Speed', mode: 'bar', min: 0, max: 100, x: 58, y: 2, w: 16, h: 18 },
-  { type: 'display', channel: 'temp', label: 'Temp', mode: 'graph', min: 0, max: 40, unit: '°C', x: 76, y: 2, w: 14, h: 18 },
+  { type: 'display', channel: 'msg', label: t('status'), mode: 'text', x: 28, y: 2, w: 28, h: 18 },
+  { type: 'display', channel: 'speed', label: t('speedLbl'), mode: 'bar', min: 0, max: 100, x: 58, y: 2, w: 16, h: 18 },
+  { type: 'display', channel: 'temp', label: t('temp'), mode: 'graph', min: 0, max: 40, unit: '°C', x: 76, y: 2, w: 14, h: 18 },
   { type: 'display', channel: 'lamp', label: 'B', mode: 'lamp', x: 91, y: 2, w: 7, h: 18 },
   { type: 'joystick', id: 'L', x: 1, y: 30, w: 24, h: 66, up: ['KeyW', 'pad:a1-'], down: ['KeyS', 'pad:a1+'], left: ['KeyA', 'pad:a0-'], right: ['KeyD', 'pad:a0+'] },
-  { type: 'slider', id: 'S', label: 'Throttle', color: '#ff9f43', x: 27, y: 30, w: 7, h: 66, up: ['KeyR', 'pad:b7'], down: ['KeyF', 'pad:b6'], speed: 100 },
+  { type: 'slider', id: 'S', label: t('throttle'), color: '#ff9f43', x: 27, y: 30, w: 7, h: 66, up: ['KeyR', 'pad:b7'], down: ['KeyF', 'pad:b6'], speed: 100 },
   { type: 'joystick', id: 'R', color: '#00c2ff', x: 36, y: 30, w: 24, h: 66, up: ['ArrowUp', 'pad:a3-'], down: ['ArrowDown', 'pad:a3+'], left: ['ArrowLeft', 'pad:a2-'], right: ['ArrowRight', 'pad:a2+'] },
   { type: 'button', id: 'Y', color: '#f6c343', x: 76, y: 32, w: 10, h: 19, bind: ['KeyI', 'pad:b3'] },
   { type: 'button', id: 'X', color: '#00c2ff', x: 65, y: 53, w: 10, h: 19, bind: ['KeyJ', 'pad:b2'] },
   { type: 'button', id: 'B', color: '#ff5c7a', x: 87, y: 53, w: 10, h: 19, bind: ['KeyL', 'pad:b1'] },
   { type: 'button', id: 'A', color: '#3ddc84', x: 76, y: 74, w: 10, h: 19, bind: ['Space', 'pad:b0'] },
-] };
+] });
 
 const NEW = {
   button: { w: 9, h: 16, bind: [] },
@@ -44,7 +45,7 @@ let device = null, rxChar = null, rxBuf = '', busy = false;
 
 const uid = () => Math.random().toString(36).slice(2, 10);
 const state = w => st.get(w.uid) || (st.set(w.uid, {}), st.get(w.uid));
-const cleanId = v => String(v).replace(/[^A-Za-z0-9_]/g, '').slice(0, 8);
+const decoder = new TextDecoder();
 
 function load(obj) {
   if (!obj || !Array.isArray(obj.widgets)) throw new Error('not a layout');
@@ -61,7 +62,7 @@ function save() {
 }
 const exportable = () => ({ widgets: layout.widgets.map(({ uid, ...w }) => w) });
 
-try { load(JSON.parse(localStorage.getItem(STORE))); } catch { load(structuredClone(DEFAULT)); }
+try { load(JSON.parse(localStorage.getItem(STORE))); } catch { load(defaults()); }
 
 /* ---------- rendering ---------- */
 
@@ -239,37 +240,37 @@ function renderPanel() {
   if (panel.hidden) return;
   const w = selected;
   panel.replaceChildren();
-  const h = el('h3', null, w.type);
+  const h = el('h3', null, t(w.type));
   const close = el('button', null, '✕');
   close.onclick = () => select(null);
   h.append(close);
   panel.append(h);
 
   if (w.type === 'display') {
-    const ch = row('Channel (name used in gamepad.show)', input(w, 'channel'));
+    const ch = row(t('channel'), input(w, 'channel'));
     ch.maxLength = 8;
     ch.setAttribute('list', 'channels');
     const dl = el('datalist'); dl.id = 'channels';
     for (const c of Object.keys(data)) { const o = el('option'); o.value = c; dl.append(o); }
     panel.append(dl);
     const mode = el('select');
-    for (const m of ['text', 'bar', 'graph', 'lamp']) { const o = el('option', null, m); o.value = m; mode.append(o); }
+    for (const m of ['text', 'bar', 'graph', 'lamp']) { const o = el('option', null, t(m)); o.value = m; mode.append(o); }
     mode.value = w.mode || 'text';
     mode.onchange = () => { w.mode = mode.value; save(); render(); renderPanel(); };
-    row('Show as', mode);
+    row(t('showAs'), mode);
     if (w.mode === 'bar' || w.mode === 'graph') {
-      row('Min', input(w, 'min', 'number'));
-      row('Max', input(w, 'max', 'number'));
+      row(t('min'), input(w, 'min', 'number'));
+      row(t('max'), input(w, 'max', 'number'));
     }
-    if (w.mode !== 'lamp') row('Unit suffix', input(w, 'unit'));
+    if (w.mode !== 'lamp') row(t('unit'), input(w, 'unit'));
   } else {
-    row('ID (name used in MakeCode blocks)', input(w, 'id')).maxLength = 8;
+    row(t('id'), input(w, 'id')).maxLength = 8;
   }
-  row('Label', input(w, 'label'));
+  row(t('label'), input(w, 'label'));
   const c = input(w, 'color', 'color');
   c.value = w.color || '#7c5cff';
-  row('Color', c);
-  if (w.type === 'slider') row('Key/pad speed (% per second)', input(w, 'speed', 'number'));
+  row(t('color'), c);
+  if (w.type === 'slider') row(t('speed'), input(w, 'speed', 'number'));
 
   for (const key of BINDS[w.type] || []) {
     const box = el('div', 'chips');
@@ -281,17 +282,17 @@ function renderPanel() {
       box.append(chip);
     });
     const on = listening?.w === w && listening.key === key;
-    const add = el('button', 'chip listen' + (on ? ' active' : ''), on ? 'Press a key or pad input… (Esc)' : '+ Bind');
+    const add = el('button', 'chip listen' + (on ? ' active' : ''), on ? t('listening') : t('bind'));
     add.onclick = () => {
       document.activeElement?.blur();
       listening = on ? null : { w, key, base: navigator.getGamepads?.().find(Boolean)?.axes.slice() };
       renderPanel();
     };
     box.append(add);
-    row(BINDS[w.type].length > 1 ? `Bind ${key}` : 'Bindings', box);
+    row(BINDS[w.type].length > 1 ? t(key) : t('bindings'), box);
   }
 
-  const del = el('button', 'danger', 'Delete widget');
+  const del = el('button', 'danger', t('delete'));
   del.onclick = () => { layout.widgets.splice(layout.widgets.indexOf(w), 1); st.delete(w.uid); save(); select(null); render(); };
   panel.append(del);
 }
@@ -316,7 +317,7 @@ function setEditing(on) {
   editing = on;
   document.body.classList.toggle('editing', on);
   $('#edittools').hidden = !on;
-  $('#edit').textContent = on ? 'Done' : 'Edit';
+  $('#edit').textContent = t(on ? 'done' : 'edit');
   for (const s of st.values()) { s.touch = false; }
   if (!on) selected = listening = null;
   render(); renderPanel();
@@ -350,11 +351,11 @@ $('#import').onchange = async e => {
   e.target.value = '';
   if (!f) return;
   try { load(JSON.parse(await f.text())); save(); render(); renderPanel(); }
-  catch (err) { alert('Could not import layout: ' + err.message); }
+  catch (err) { alert(t('importFail') + err.message); }
 };
 $('#reset').onclick = () => {
-  if (!confirm('Replace your layout with the default one?')) return;
-  load(structuredClone(DEFAULT)); save(); render(); renderPanel();
+  if (!confirm(t('resetConfirm'))) return;
+  load(defaults()); save(); render(); renderPanel();
 };
 $('#fs').onclick = async () => {
   if (document.fullscreenElement) return document.exitFullscreen();
@@ -382,28 +383,31 @@ addEventListener('resize', render);
 /* ---------- bluetooth ---------- */
 
 async function connect() {
-  if (!navigator.bluetooth) return alert('This browser has no Web Bluetooth. Use Chrome or Edge (desktop or Android).');
+  if (!navigator.bluetooth) return alert(t('noBt'));
   device = await navigator.bluetooth.requestDevice({ filters: [{ namePrefix: 'BBC micro:bit' }], optionalServices: [UART] });
   device.addEventListener('gattserverdisconnected', disconnected);
   const svc = await (await device.gatt.connect()).getPrimaryService(UART);
   const tx = await svc.getCharacteristic(UART_TX);
-  tx.addEventListener('characteristicvaluechanged', e => receive(new TextDecoder().decode(e.target.value)));
+  tx.addEventListener('characteristicvaluechanged', e => receive(decoder.decode(e.target.value, { stream: true })));
   await tx.startNotifications();
   rxChar = await svc.getCharacteristic(UART_RX);
   for (const s of st.values()) s.sent = null; // push full state on connect
   $('#dot').classList.add('on');
-  $('#devname').textContent = device.name;
-  $('#connect').textContent = 'Disconnect';
+  showConn();
+}
+function showConn() {
+  const on = !!rxChar;
+  $('#devname').textContent = on ? device.name : t('notConnected');
+  $('#connect').textContent = t(on ? 'disconnect' : 'connect');
 }
 function disconnected() {
   rxChar = null; busy = false; pending.clear();
   $('#dot').classList.remove('on');
-  $('#devname').textContent = 'Not connected';
-  $('#connect').textContent = 'Connect';
+  showConn();
 }
 $('#connect').onclick = async () => {
   if (device?.gatt.connected) return device.gatt.disconnect();
-  try { await connect(); } catch (e) { if (e.name !== 'NotFoundError') alert('Could not connect: ' + e.message); disconnected(); }
+  try { await connect(); } catch (e) { if (e.name !== 'NotFoundError') alert(t('connectFail') + e.message); disconnected(); }
 };
 
 function receive(text) {
@@ -456,5 +460,9 @@ function frame(t) {
   requestAnimationFrame(frame);
 }
 
-render();
+$('#lang').value = lang;
+$('#lang').onchange = e => { setLang(e.target.value); applyStatic(); showConn(); setEditing(editing); };
+applyStatic();
+showConn();
+setEditing(false);
 requestAnimationFrame(frame);

@@ -22,6 +22,7 @@ It has two parts:
 * **Edit mode**: drag widgets anywhere and resize them with the corner handle. Tap one to set its ID, label, color, bindings and display options.
 * **Bindings**: press **+ Bind**, then press a key, a controller button or move a stick. You can bind as many inputs to one widget as you like, and touch always works too.
 * **Controllers** use the browser Gamepad API (Xbox, PlayStation and most USB/Bluetooth pads). Plug one in and press any button so the browser detects it.
+* **Greek / English**: the app follows your browser language, or pick **EN / ΕΛ** in the toolbar. The MakeCode blocks are translated too, so switch MakeCode to Ελληνικά. Display texts, labels, IDs and channel names can all be Greek.
 * **Layouts** are saved in the browser. Use **Export** / **Import** to back them up or share them as JSON files.
 
 ## MakeCode extension
@@ -58,11 +59,13 @@ A demo `.hex` that matches the app's default layout is attached to each [release
 ### Notes
 * Pairing is not required. The extension sets "No Pairing Required" for you.
 * The extension uses the Bluetooth UART receive handler, so don't add your own `on bluetooth data received` block.
-* IDs and channel names can only use letters, digits and `_`, with at most 8 characters, so every message fits in one Bluetooth packet.
+* IDs and channel names can only use letters (Greek too), digits and `_`, with at most 8 characters.
+* Texts can be any length and any language. They are UTF-8 and split into 20-byte Bluetooth packets, which the app joins back together.
 
 ## Protocol
 
-Messages are plain-text lines over the Nordic UART service, so you can use them from any firmware.
+Messages are UTF-8 text lines, ending in `
+`, over the Nordic UART service. A line can span several 20-byte packets, so you can use them from any firmware.
 
 | Direction | Line | Meaning |
 |---|---|---|

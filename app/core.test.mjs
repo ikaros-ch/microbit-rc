@@ -1,9 +1,16 @@
 // Run: node app/core.test.mjs
 import assert from 'node:assert/strict';
-import { encode, pack, splitLines, parseData, readBinding, step } from './core.js';
+import { encode, pack, splitLines, parseData, readBinding, step, cleanId } from './core.js';
 
 assert.equal(encode('J', 'L', [-50, 30]), 'JL=-50,30');
-assert.deepEqual(pack(['BA=1', 'BB=0', 'SThrottle=100', 'JL=-100,-100']), ['BA=1\nBB=0\n', 'SThrottle=100\n', 'JL=-100,-100\n']);
+// Greek is 2 bytes/char: packets stay <= 20 bytes and reassemble exactly
+const lines = ['BΑλφα=1', 'JΤιμόνι=-100,-100', 'SΓκάζι=42'];
+const pk = pack(lines);
+assert.ok(pk.every(p => p.length <= 20));
+const dec = new TextDecoder();
+assert.equal(pk.map(p => dec.decode(p, { stream: true })).join('') + dec.decode(), lines.join('\n') + '\n');
+assert.equal(cleanId('Ταχύτητα-1 x'), 'Ταχύτητα');
+assert.equal(cleanId('a=b\nc'), 'abc');
 assert.deepEqual(splitLines('Da=1\r\nDb=2\nDc'), [['Da=1', 'Db=2'], 'Dc']);
 assert.deepEqual(parseData('Dmsg=a=b'), ['msg', 'a=b']);
 assert.equal(parseData('Xmsg=1'), null);

@@ -8,18 +8,17 @@ export const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 // "J" "L" [-50, 30] -> "JL=-50,30"
 export const encode = (type, id, v) => `${type}${id}=${Array.isArray(v) ? v.join(',') : v}`;
 
-// Pack lines into as few BLE writes as possible, each <= MAX_PACKET bytes.
+// UTF-8 encode lines and cut them into BLE writes of <= MAX_PACKET bytes.
+// Lines may straddle packets: the micro:bit buffers until '\n'.
 export function pack(lines, max = MAX_PACKET) {
+  const b = new TextEncoder().encode(lines.map(l => l + '\n').join(''));
   const out = [];
-  let cur = '';
-  for (const l of lines) {
-    const s = l + '\n';
-    if (cur && cur.length + s.length > max) { out.push(cur); cur = ''; }
-    cur += s;
-  }
-  if (cur) out.push(cur);
+  for (let i = 0; i < b.length; i += max) out.push(b.subarray(i, i + max));
   return out;
 }
+
+// Widget IDs / channel names: any letters (Greek too), digits, _; max 8 characters.
+export const cleanId = v => [...String(v).replace(/[^\p{L}\p{N}_]/gu, '')].slice(0, 8).join('');
 
 // Split a receive buffer into complete lines plus the unfinished remainder.
 export function splitLines(buf) {

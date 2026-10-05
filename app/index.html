@@ -15,20 +15,24 @@
   <span id="tx" class="mono"></span>
   <span class="grow"></span>
   <span id="edittools" hidden>
-    <select id="add" aria-label="Add widget">
-      <option value="">+ Add…</option>
-      <option value="button">Button</option>
-      <option value="toggle">Toggle switch</option>
-      <option value="slider">Slider (linear pot)</option>
-      <option value="joystick">Joystick</option>
-      <option value="display">Display</option>
+    <select id="add" data-i18n-title="add">
+      <option value="" data-i18n="add">+ Add…</option>
+      <option value="button" data-i18n="button">Button</option>
+      <option value="toggle" data-i18n="toggle">Toggle switch</option>
+      <option value="slider" data-i18n="slider">Slider (linear pot)</option>
+      <option value="joystick" data-i18n="joystick">Joystick</option>
+      <option value="display" data-i18n="display">Display</option>
     </select>
-    <button id="export">Export</button>
-    <label class="btn">Import<input id="import" type="file" accept=".json,application/json" hidden></label>
-    <button id="reset">Reset</button>
+    <button id="export" data-i18n="export">Export</button>
+    <label class="btn"><span data-i18n="import">Import</span><input id="import" type="file" accept=".json,application/json" hidden></label>
+    <button id="reset" data-i18n="reset">Reset</button>
   </span>
   <button id="edit">Edit</button>
-  <button id="fs" title="Fullscreen" aria-label="Fullscreen">⛶</button>
+  <select id="lang" aria-label="Language">
+    <option value="en">EN</option>
+    <option value="el">ΕΛ</option>
+  </select>
+  <button id="fs" data-i18n-title="fullscreen">⛶</button>
 </header>
 <main id="stage"></main>
 <aside id="panel" hidden></aside>

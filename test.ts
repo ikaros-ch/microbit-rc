@@ -8,7 +8,7 @@ gamepad.onButton("B", GamepadButtonEvent.Released, function () {
 basic.forever(function () {
     gamepad.show("speed", gamepad.value("S"))
     gamepad.show("temp", input.temperature())
-    gamepad.showText("msg", gamepad.isOn("T1") ? "lights ON" : "lights off")
+    gamepad.showText("msg", gamepad.isOn("T1") ? "φώτα ανοιχτά, lights ON" : "φώτα κλειστά, lights off")
     if (gamepad.isOn("A")) {
         basic.showIcon(IconNames.Heart, 0)
     } else {
