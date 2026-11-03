@@ -35,25 +35,29 @@ It has two parts:
 3. Accept that the extension removes `radio`, because Bluetooth and radio can't run together.
 
 ```blocks
+// Show a heart when button widget "A" in the app is pressed
 gamepad.onButton("A", GamepadButtonEvent.Pressed, function () {
     basic.showIcon(IconNames.Heart)
 })
 basic.forever(function () {
+    // Send slider "S" back to the app's "speed" display
     gamepad.show("speed", gamepad.value("S"))
+    // Show a text on the "msg" display, depending on toggle "T1"
     gamepad.showText("msg", gamepad.isOn("T1") ? "lights ON" : "lights off")
+    // Move one LED with joystick "L": -100..100 maps to columns/rows 0..4
     led.plot(Math.round(gamepad.joystick("L", GamepadAxis.X) / 50) + 2, 2 - Math.round(gamepad.joystick("L", GamepadAxis.Y) / 50))
 })
 ```
 
 | Block | What it does |
 |---|---|
-| `on gamepad button "A" pressed/released` | runs when a button widget goes down or up |
-| `on gamepad "S" changed` | runs when any widget with that ID changes |
-| `gamepad "T1" is on` | true while a button is held or a toggle is on |
-| `gamepad "S" value` | slider 0–100, single-axis stick -100..100 (0/1 for buttons and toggles) |
-| `gamepad joystick "L" x/y` | -100..100, right and up are positive |
-| `gamepad display "speed" show 42` | shows a number on every display widget set to channel `speed` |
-| `gamepad display "msg" show text "hi"` | shows text the same way |
+| [`on gamepad button "A" pressed/released`](docs/on-button.md) | runs when a button widget goes down or up |
+| [`on gamepad "S" changed`](docs/on-change.md) | runs when any widget with that ID changes |
+| [`gamepad "T1" is on`](docs/is-on.md) | true while a button is held or a toggle is on |
+| [`gamepad "S" value`](docs/value.md) | slider 0–100, single-axis stick -100..100 (0/1 for buttons and toggles) |
+| [`gamepad joystick "L" x/y`](docs/joystick.md) | -100..100, right and up are positive |
+| [`gamepad display "speed" show 42`](docs/show.md) | shows a number on every display widget set to channel `speed` |
+| [`gamepad display "msg" show text "hi"`](docs/show-text.md) | shows text the same way |
 
 The micro:bit sends display values at most every 100 ms and resends all of them every 2 s, so you can call `show` in a fast `forever` loop.
 
@@ -102,6 +106,17 @@ npx makecode build       # compile the extension + demo
 
 Pushing to `main` deploys `app/` to GitHub Pages.
 
+## Learn more
+
+* [Bluetooth pairing on the micro:bit](https://makecode.microbit.org/reference/bluetooth/bluetooth-pairing)
+* [MakeCode Bluetooth UART reference](https://makecode.microbit.org/reference/bluetooth/start-uart-service)
+* [MakeCode events and handlers](https://makecode.microbit.org/blocks/on-start)
+* [Gamepad API (for controllers in the app)](https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API/Using_the_Gamepad_API)
+
 ## License
 
 MIT
+
+## Supported targets
+
+* for PXT/microbit

@@ -114,6 +114,7 @@ namespace gamepad {
      */
     //% blockId=gamepad_on_button block="on gamepad button $id $event"
     //% id.defl="A" group="Inputs" weight=100
+    //% help=github:microbit-rc/docs/on-button
     export function onButton(id: string, event: GamepadButtonEvent, handler: () => void) {
         control.onEvent(event == GamepadButtonEvent.Pressed ? EVT_DOWN : EVT_UP, index(id) + 1, handler)
     }
@@ -124,6 +125,7 @@ namespace gamepad {
      */
     //% blockId=gamepad_on_change block="on gamepad $id changed"
     //% id.defl="S" group="Inputs" weight=90
+    //% help=github:microbit-rc/docs/on-change
     export function onChange(id: string, handler: () => void) {
         control.onEvent(EVT_CHANGE, index(id) + 1, handler)
     }
@@ -134,6 +136,7 @@ namespace gamepad {
      */
     //% blockId=gamepad_is_on block="gamepad $id is on"
     //% id.defl="T1" group="Inputs" weight=80
+    //% help=github:microbit-rc/docs/is-on
     export function isOn(id: string): boolean {
         return xs[index(id)] != 0
     }
@@ -144,6 +147,7 @@ namespace gamepad {
      */
     //% blockId=gamepad_value block="gamepad $id value"
     //% id.defl="S" group="Inputs" weight=70
+    //% help=github:microbit-rc/docs/value
     export function value(id: string): number {
         return xs[index(id)]
     }
@@ -154,6 +158,7 @@ namespace gamepad {
      */
     //% blockId=gamepad_joystick block="gamepad joystick $id $axis"
     //% id.defl="L" group="Inputs" weight=60
+    //% help=github:microbit-rc/docs/joystick
     export function joystick(id: string, axis: GamepadAxis): number {
         const i = index(id)
         return axis == GamepadAxis.X ? xs[i] : ys[i]
@@ -165,6 +170,7 @@ namespace gamepad {
      */
     //% blockId=gamepad_show block="gamepad display $channel show $value"
     //% channel.defl="speed" group="Display" weight=50
+    //% help=github:microbit-rc/docs/show
     export function show(channel: string, value: number) {
         put(channel, "" + value)
     }
@@ -175,6 +181,7 @@ namespace gamepad {
      */
     //% blockId=gamepad_show_text block="gamepad display $channel show text $text"
     //% channel.defl="msg" group="Display" weight=40
+    //% help=github:microbit-rc/docs/show-text
     export function showText(channel: string, text: string) {
         put(channel, text.split("\n").join(" "))
     }

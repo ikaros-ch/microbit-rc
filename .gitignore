@@ -7,3 +7,11 @@ android/.gradle/
 android/build/
 android/app/build/
 android/local.properties
+built
+node_modules
+yotta_modules
+yotta_targets
+pxt_modules
+_site
+*.db
+*.tgz
