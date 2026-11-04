@@ -8,7 +8,7 @@ It has two parts:
 
 * **The web app** (`app/`): runs in Chrome/Edge on a phone, tablet or PC. **[Open the app](https://ikaros-ch.github.io/microbit-rc/)**
 * **Android app**: `rc-pad.apk` on the [latest release](https://github.com/ikaros-ch/microbit-rc/releases/latest) opens the same app full screen. It needs Chrome installed, see [Android app](#android-app).
-* **The MakeCode extension** (this repo's root): adds a **Gamepad** block category to MakeCode.
+* **The MakeCode extension** (this repo's root): adds an **RC Pad** block category to MakeCode.
 
 ## Features
 
@@ -24,7 +24,7 @@ It has two parts:
 * **Edit mode**: drag widgets anywhere and resize them with the corner handle. Tap one to set its ID, label, color, bindings and display options.
 * **Bindings**: press **+ Bind**, then press a key, a controller button or move a stick. You can bind as many inputs to one widget as you like, and touch always works too.
 * **Controllers** use the browser Gamepad API (Xbox, PlayStation and most USB/Bluetooth pads). Plug one in and press any button so the browser detects it.
-* **Greek / English**: the app follows your browser language, or pick **EN / ΕΛ** in the toolbar. The MakeCode blocks are translated too, so switch MakeCode to Ελληνικά. Display texts, labels, IDs and channel names can all be Greek.
+* **Greek / English**: the app follows your browser language, or pick **EN / ΕΛ** in the toolbar. The MakeCode blocks are translated too, so switch MakeCode to Ελληνικά. Widget labels can be Greek; texts sent to the micro:bit, IDs and channel names must use English letters (see [Notes](#notes)).
 * **⟳ Rotate**: turns the whole app 90° per press, so you can hold a phone sideways while the browser stays in portrait (or the other way round). Touch, dragging and resizing work at every angle, and the app remembers your choice.
 * **Layouts** are saved in the browser. Use **Export** / **Import** to back them up or share them as JSON files.
 
@@ -36,28 +36,28 @@ It has two parts:
 
 ```blocks
 // Show a heart when button widget "A" in the app is pressed
-gamepad.onButton("A", GamepadButtonEvent.Pressed, function () {
+rcPad.onButton("A", rcPad.ButtonEvent.Pressed, function () {
     basic.showIcon(IconNames.Heart)
 })
 basic.forever(function () {
     // Send slider "S" back to the app's "speed" display
-    gamepad.show("speed", gamepad.value("S"))
+    rcPad.show("speed", rcPad.value("S"))
     // Show a text on the "msg" display, depending on toggle "T1"
-    gamepad.showText("msg", gamepad.isOn("T1") ? "lights ON" : "lights off")
+    rcPad.showText("msg", rcPad.isOn("T1") ? "lights ON" : "lights off")
     // Move one LED with joystick "L": -100..100 maps to columns/rows 0..4
-    led.plot(Math.round(gamepad.joystick("L", GamepadAxis.X) / 50) + 2, 2 - Math.round(gamepad.joystick("L", GamepadAxis.Y) / 50))
+    led.plot(Math.round(rcPad.joystick("L", rcPad.Axis.X) / 50) + 2, 2 - Math.round(rcPad.joystick("L", rcPad.Axis.Y) / 50))
 })
 ```
 
 | Block | What it does |
 |---|---|
-| [`on gamepad button "A" pressed/released`](docs/on-button.md) | runs when a button widget goes down or up |
-| [`on gamepad "S" changed`](docs/on-change.md) | runs when any widget with that ID changes |
-| [`gamepad "T1" is on`](docs/is-on.md) | true while a button is held or a toggle is on |
-| [`gamepad "S" value`](docs/value.md) | slider 0–100, single-axis stick -100..100 (0/1 for buttons and toggles) |
-| [`gamepad joystick "L" x/y`](docs/joystick.md) | -100..100, right and up are positive |
-| [`gamepad display "speed" show 42`](docs/show.md) | shows a number on every display widget set to channel `speed` |
-| [`gamepad display "msg" show text "hi"`](docs/show-text.md) | shows text the same way |
+| [`on rc pad button "A" pressed/released`](docs/on-button.md) | runs when a button widget goes down or up |
+| [`on rc pad "S" changed`](docs/on-change.md) | runs when any widget with that ID changes |
+| [`rc pad "T1" is on`](docs/is-on.md) | true while a button is held or a toggle is on |
+| [`rc pad "S" value`](docs/value.md) | slider 0–100, single-axis stick -100..100 (0/1 for buttons and toggles) |
+| [`rc pad joystick "L" x/y`](docs/joystick.md) | -100..100, right and up are positive |
+| [`rc pad display "speed" show 42`](docs/show.md) | shows a number on every display widget set to channel `speed` |
+| [`rc pad display "msg" show text "hi"`](docs/show-text.md) | shows text the same way |
 
 The micro:bit sends display values at most every 100 ms and resends all of them every 2 s, so you can call `show` in a fast `forever` loop.
 
@@ -65,6 +65,7 @@ A demo `.hex` that matches the app's default layout is attached to each [release
 
 ### Notes
 * **Bluetooth pairing:** in MakeCode open ⚙ → **Project Settings** and select **No Pairing Required**, then download. The extension asks for it, but MakeCode may still show *JustWorks*. With JustWorks the app connects, but the micro:bit ignores every button.
+* **Upgrading from v1:** v2 renamed the blocks' code from `gamepad.` to `rcPad.` (and `GamepadButtonEvent`/`GamepadAxis` to `rcPad.ButtonEvent`/`rcPad.Axis`), so it doesn't clash with the `blehid` extension. Block projects keep working; fix JavaScript projects by renaming.
 * The extension uses the Bluetooth UART receive handler, so don't add your own `on bluetooth data received` block.
 * IDs and channel names can only use English letters, digits and `_`, with at most 8 characters.
 * Texts can be any length, but only English letters, digits and symbols: MakeCode for micro:bit can't store Greek or other non-English letters in text. Long texts are split into 20-byte Bluetooth packets, which the app joins back together.
@@ -80,8 +81,7 @@ The APK is a [Trusted Web Activity](https://developer.chrome.com/docs/android/tr
 
 ## Protocol
 
-Messages are UTF-8 text lines, ending in `
-`, over the Nordic UART service. A line can span several 20-byte packets, so you can use them from any firmware.
+Messages are UTF-8 text lines, ending in `\n`, over the Nordic UART service. A line can span several 20-byte packets, so you can use them from any firmware.
 
 | Direction | Line | Meaning |
 |---|---|---|

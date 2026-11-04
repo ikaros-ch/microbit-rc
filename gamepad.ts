@@ -1,25 +1,31 @@
-enum GamepadButtonEvent {
-    //% block="pressed"
-    Pressed = 1,
-    //% block="released"
-    Released = 0
-}
-
-enum GamepadAxis {
-    //% block="x"
-    X,
-    //% block="y"
-    Y
-}
-
 /**
  * Inputs from the RC Pad web app (buttons, toggles, sliders, joysticks)
  * and values sent back to its display widgets. Everything goes over the
  * Bluetooth UART service as newline-terminated text lines.
  */
-//% color=#7c5cff weight=95 icon="" block="Gamepad"
+//% color=#7c5cff weight=95 icon="" block="RC Pad"
 //% groups='["Inputs", "Display"]'
-namespace gamepad {
+namespace rcPad {
+    /**
+     * Whether a button in the app went down or came back up.
+     */
+    export enum ButtonEvent {
+        //% block="pressed"
+        Pressed = 1,
+        //% block="released"
+        Released = 0
+    }
+
+    /**
+     * Joystick axis: x is left/right, y is down/up.
+     */
+    export enum Axis {
+        //% block="x"
+        X,
+        //% block="y"
+        Y
+    }
+
     const EVT_DOWN = 0x7E01
     const EVT_UP = 0x7E02
     const EVT_CHANGE = 0x7E03
@@ -62,10 +68,6 @@ namespace gamepad {
         control.raiseEvent(EVT_CHANGE, i + 1)
     }
 
-    bluetooth.startUartService()
-    bluetooth.onUartDataReceived(serial.delimiters(Delimiters.NewLine), function () {
-        handle(bluetooth.uartReadUntil(serial.delimiters(Delimiters.NewLine)))
-    })
 
     // Display channels: latest value per channel, sent at most every 100 ms.
     let outKeys: string[] = []
@@ -92,40 +94,53 @@ namespace gamepad {
             bluetooth.uartWriteBuffer(buf.slice(i, Math.min(20, buf.length - i)))
     }
 
-    control.inBackground(function () {
-        let tick = 0
-        while (true) {
-            // resend everything every ~2 s so a freshly connected app catches up
-            const all = tick++ % 20 == 0
-            for (let i = 0; i < outKeys.length; i++) {
-                if (all || dirty[i]) {
-                    dirty[i] = false
-                    send("D" + outKeys[i] + "=" + outVals[i] + "\n")
+    let started = false
+
+    // Start Bluetooth and the send loop on the first block call, not at load.
+    function init() {
+        if (started) return
+        started = true
+        bluetooth.startUartService()
+        bluetooth.onUartDataReceived(serial.delimiters(Delimiters.NewLine), function () {
+            handle(bluetooth.uartReadUntil(serial.delimiters(Delimiters.NewLine)))
+        })
+        control.inBackground(function () {
+            let tick = 0
+            while (true) {
+                // resend everything every ~2 s so a freshly connected app catches up
+                const all = tick++ % 20 == 0
+                for (let i = 0; i < outKeys.length; i++) {
+                    if (all || dirty[i]) {
+                        dirty[i] = false
+                        send("D" + outKeys[i] + "=" + outVals[i] + "\n")
+                    }
                 }
+                basic.pause(100)
             }
-            basic.pause(100)
-        }
-    })
+        })
+    }
 
     /**
      * Run code when a button in the app is pressed or released.
      * @param id the widget ID set in the app, eg: "A"
      */
-    //% blockId=gamepad_on_button block="on gamepad button $id $event"
+    //% blockId=gamepad_on_button block="on rc pad button $id $event"
     //% id.defl="A" group="Inputs" weight=100
     //% help=github:microbit-rc/docs/on-button
-    export function onButton(id: string, event: GamepadButtonEvent, handler: () => void) {
-        control.onEvent(event == GamepadButtonEvent.Pressed ? EVT_DOWN : EVT_UP, index(id) + 1, handler)
+    export function onButton(id: string, event: ButtonEvent, handler: () => void) {
+        init()
+        control.onEvent(event == ButtonEvent.Pressed ? EVT_DOWN : EVT_UP, index(id) + 1, handler)
     }
 
     /**
      * Run code when any widget (button, toggle, slider, joystick) changes value.
      * @param id the widget ID set in the app, eg: "S"
      */
-    //% blockId=gamepad_on_change block="on gamepad $id changed"
+    //% blockId=gamepad_on_change block="on rc pad $id changed"
     //% id.defl="S" group="Inputs" weight=90
     //% help=github:microbit-rc/docs/on-change
     export function onChange(id: string, handler: () => void) {
+        init()
         control.onEvent(EVT_CHANGE, index(id) + 1, handler)
     }
 
@@ -133,10 +148,11 @@ namespace gamepad {
      * True while a button is held, or while a toggle switch is on.
      * @param id the widget ID set in the app, eg: "T1"
      */
-    //% blockId=gamepad_is_on block="gamepad $id is on"
+    //% blockId=gamepad_is_on block="rc pad $id is on"
     //% id.defl="T1" group="Inputs" weight=80
     //% help=github:microbit-rc/docs/is-on
     export function isOn(id: string): boolean {
+        init()
         return xs[index(id)] != 0
     }
 
@@ -144,10 +160,11 @@ namespace gamepad {
      * Slider position 0..100, single-axis stick -100..100 (up/right positive), or 0/1 for buttons and toggles.
      * @param id the widget ID set in the app, eg: "S"
      */
-    //% blockId=gamepad_value block="gamepad $id value"
+    //% blockId=gamepad_value block="rc pad $id value"
     //% id.defl="S" group="Inputs" weight=70
     //% help=github:microbit-rc/docs/value
     export function value(id: string): number {
+        init()
         return xs[index(id)]
     }
 
@@ -155,22 +172,24 @@ namespace gamepad {
      * Joystick position on one axis, -100..100 (right and up are positive).
      * @param id the widget ID set in the app, eg: "L"
      */
-    //% blockId=gamepad_joystick block="gamepad joystick $id $axis"
+    //% blockId=gamepad_joystick block="rc pad joystick $id $axis"
     //% id.defl="L" group="Inputs" weight=60
     //% help=github:microbit-rc/docs/joystick
-    export function joystick(id: string, axis: GamepadAxis): number {
+    export function joystick(id: string, axis: Axis): number {
+        init()
         const i = index(id)
-        return axis == GamepadAxis.X ? xs[i] : ys[i]
+        return axis == Axis.X ? xs[i] : ys[i]
     }
 
     /**
      * Show a number on every display widget bound to this channel.
      * @param channel the display channel set in the app, eg: "speed"
      */
-    //% blockId=gamepad_show block="gamepad display $channel show $value"
+    //% blockId=gamepad_show block="rc pad display $channel show $value"
     //% channel.defl="speed" group="Display" weight=50
     //% help=github:microbit-rc/docs/show
     export function show(channel: string, value: number) {
+        init()
         put(channel, "" + value)
     }
 
@@ -178,10 +197,11 @@ namespace gamepad {
      * Show text (English letters only) on every display widget bound to this channel.
      * @param channel the display channel set in the app, eg: "msg"
      */
-    //% blockId=gamepad_show_text block="gamepad display $channel show text $text"
+    //% blockId=gamepad_show_text block="rc pad display $channel show text $text"
     //% channel.defl="msg" group="Display" weight=40
     //% help=github:microbit-rc/docs/show-text
     export function showText(channel: string, text: string) {
+        init()
         put(channel, text.split("\n").join(" "))
     }
 }

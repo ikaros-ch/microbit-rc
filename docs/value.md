@@ -1,19 +1,24 @@
 # Value
 
-Slider position 0..100, single-axis stick -100..100 (up/right positive), or 0/1 for buttons and toggles.
+Get the value of a widget: a slider gives 0 to 100, a single-axis stick -100 to 100 (up and right are positive), and buttons and toggles give 0 or 1.
 
 ```sig
-gamepad.value("S")
+rcPad.value("S")
 ```
 
 ## Parameters
 
-* **id**: the widget ID set in the app
+* **id**: the widget ID set in the app, like `"S"`
 
 ## Example
 
+Set the brightness of the screen with slider S.
+
 ```blocks
-gamepad.value("S")
+basic.showIcon(IconNames.Square)
+basic.forever(function () {
+    led.setBrightness(rcPad.value("S") * 255 / 100)
+})
 ```
 
 ```package

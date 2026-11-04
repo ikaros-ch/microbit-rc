@@ -1,23 +1,24 @@
 # On change
 
-Run code when any widget (button, toggle, slider, joystick) changes value.
+Run code when any widget (button, toggle, slider, joystick) with this ID changes value.
 
 ```sig
-gamepad.onChange("S", function () {
-    basic.showIcon(IconNames.Heart)
+rcPad.onChange("S", function () {
 })
 ```
 
 ## Parameters
 
-* **id**: the widget ID set in the app
-* **handler**: 
+* **id**: the widget ID set in the app, like `"S"`
+* **handler**: the code to run
 
 ## Example
 
+Show the slider position as a bar graph each time it moves.
+
 ```blocks
-gamepad.onChange("S", function () {
-    basic.showIcon(IconNames.Heart)
+rcPad.onChange("S", function () {
+    led.plotBarGraph(rcPad.value("S"), 100)
 })
 ```
 

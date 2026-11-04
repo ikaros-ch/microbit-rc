@@ -1,19 +1,23 @@
 # Is on
 
-True while a button is held, or while a toggle switch is on.
+Check if a button is held or a toggle switch is on.
 
 ```sig
-gamepad.isOn("T1")
+rcPad.isOn("T1")
 ```
 
 ## Parameters
 
-* **id**: the widget ID set in the app
+* **id**: the widget ID set in the app, like `"T1"`
 
 ## Example
 
+Turn on pin P1 (an LED, for example) while toggle T1 is on.
+
 ```blocks
-gamepad.isOn("T1")
+basic.forever(function () {
+    pins.digitalWritePin(DigitalPin.P1, rcPad.isOn("T1") ? 1 : 0)
+})
 ```
 
 ```package

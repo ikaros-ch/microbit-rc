@@ -17,7 +17,7 @@ const STR = {
   reset: ['Reset', 'Επαναφορά'],
   rotate: ['Rotate 90°', 'Περιστροφή 90°'],
   fullscreen: ['Fullscreen', 'Πλήρης οθόνη'],
-  channel: ['Channel (name used in gamepad.show)', 'Κανάλι (όνομα στο gamepad.show)'],
+  channel: ['Channel (name used in rcPad.show)', 'Κανάλι (όνομα στο rcPad.show)'],
   showAs: ['Show as', 'Εμφάνιση ως'],
   text: ['text', 'κείμενο'],
   bar: ['bar', 'μπάρα'],
