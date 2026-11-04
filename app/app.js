@@ -469,10 +469,8 @@ async function flush() {
   pending.clear();
   $('#tx').textContent = lines.join('  ');
   try {
-    for (const p of pack(lines)) {
-      const buf = new TextEncoder().encode(p);
+    for (const buf of pack(lines)) // already UTF-8 bytes
       await (rxChar.properties.writeWithoutResponse ? rxChar.writeValueWithoutResponse(buf) : rxChar.writeValueWithResponse(buf));
-    }
   } catch (e) { console.warn('write failed', e); }
   busy = false;
 }
