@@ -17,8 +17,9 @@ export function pack(lines, max = MAX_PACKET) {
   return out;
 }
 
-// Widget IDs / channel names: any letters (Greek too), digits, _; max 8 characters.
-export const cleanId = v => [...String(v).replace(/[^\p{L}\p{N}_]/gu, '')].slice(0, 8).join('');
+// Widget IDs / channel names: A-Z, a-z, 0-9, _; max 8 characters. The micro:bit
+// can't store non-English letters in strings, so they would never match.
+export const cleanId = v => String(v).replace(/[^A-Za-z0-9_]/g, '').slice(0, 8);
 
 // Screen point -> point in a W x H box rotated clockwise by rot (see #app.rotN in style.css).
 export function unrotate(rot, W, H, x, y) {

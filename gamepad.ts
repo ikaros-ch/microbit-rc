@@ -84,9 +84,8 @@ namespace gamepad {
         }
     }
 
-    // The UART characteristic carries at most 20 bytes per packet, and Greek
-    // letters are 2 bytes in UTF-8. Cut the line into raw byte chunks; the app
-    // reassembles them with a streaming decoder.
+    // The UART characteristic carries at most 20 bytes per packet. Cut the line
+    // into raw byte chunks; the app reassembles them with a streaming decoder.
     function send(line: string) {
         const buf = Buffer.fromUTF8(line)
         for (let i = 0; i < buf.length; i += 20)
@@ -176,7 +175,7 @@ namespace gamepad {
     }
 
     /**
-     * Show text (any language, eg Greek) on every display widget bound to this channel.
+     * Show text (English letters only) on every display widget bound to this channel.
      * @param channel the display channel set in the app, eg: "msg"
      */
     //% blockId=gamepad_show_text block="gamepad display $channel show text $text"

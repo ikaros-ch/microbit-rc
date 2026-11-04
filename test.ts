@@ -15,8 +15,8 @@ basic.forever(function () {
     // EXPECT: moving slider S (0-100) updates the "speed" display within ~0.1 s
     gamepad.show("temp", input.temperature())
     // EXPECT: "temp" display shows the micro:bit temperature in °C
-    // EXPECT: toggle T1 switches the "msg" text between ON and off, Greek letters intact
-    gamepad.showText("msg", gamepad.isOn("T1") ? "φώτα ανοιχτά, lights ON" : "φώτα κλειστά, lights off")
+    // EXPECT: toggle T1 switches the "msg" text between "lights ON" and "lights off"
+    gamepad.showText("msg", gamepad.isOn("T1") ? "lights ON" : "lights off")
     if (gamepad.isOn("A")) {
         basic.showIcon(IconNames.Heart, 0)
         // EXPECT: heart while button A is held

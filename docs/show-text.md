@@ -1,6 +1,6 @@
 # Show text
 
-Show text (any language, eg Greek) on every display widget bound to this channel.
+Show text on every display widget bound to this channel. Use English letters only: the micro:bit can't store Greek letters in text.
 
 ```sig
 gamepad.showText("msg", "hello")

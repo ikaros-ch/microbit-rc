@@ -66,8 +66,8 @@ A demo `.hex` that matches the app's default layout is attached to each [release
 ### Notes
 * **Bluetooth pairing:** in MakeCode open ⚙ → **Project Settings** and select **No Pairing Required**, then download. The extension asks for it, but MakeCode may still show *JustWorks*. With JustWorks the app connects, but the micro:bit ignores every button.
 * The extension uses the Bluetooth UART receive handler, so don't add your own `on bluetooth data received` block.
-* IDs and channel names can only use letters (Greek too), digits and `_`, with at most 8 characters.
-* Texts can be any length and any language. They are UTF-8 and split into 20-byte Bluetooth packets, which the app joins back together.
+* IDs and channel names can only use English letters, digits and `_`, with at most 8 characters.
+* Texts can be any length, but only English letters, digits and symbols: MakeCode for micro:bit can't store Greek or other non-English letters in text. Long texts are split into 20-byte Bluetooth packets, which the app joins back together.
 
 ## Android app
 
