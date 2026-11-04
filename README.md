@@ -64,7 +64,7 @@ The micro:bit sends display values at most every 100 ms and resends all of them 
 A demo `.hex` that matches the app's default layout is attached to each [release](https://github.com/ikaros-ch/microbit-rc/releases/latest). It is built from [test.ts](test.ts).
 
 ### Notes
-* Pairing is not required. The extension sets "No Pairing Required" for you.
+* **Bluetooth pairing:** in MakeCode open ⚙ → **Project Settings** and select **No Pairing Required**, then download. The extension asks for it, but MakeCode may still show *JustWorks*. With JustWorks the app connects, but the micro:bit ignores every button.
 * The extension uses the Bluetooth UART receive handler, so don't add your own `on bluetooth data received` block.
 * IDs and channel names can only use letters (Greek too), digits and `_`, with at most 8 characters.
 * Texts can be any length and any language. They are UTF-8 and split into 20-byte Bluetooth packets, which the app joins back together.
