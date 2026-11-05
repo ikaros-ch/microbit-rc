@@ -43,7 +43,11 @@ basic.forever(function () {
     // Send slider "S" back to the app's "speed" display
     rcPad.show("speed", rcPad.value("S"))
     // Show a text on the "msg" display, depending on toggle "T1"
-    rcPad.showText("msg", rcPad.isOn("T1") ? "lights ON" : "lights off")
+    if (rcPad.isOn("T1")) {
+        rcPad.showText("msg", "lights ON")
+    } else {
+        rcPad.showText("msg", "lights off")
+    }
     // Move one LED with joystick "L": -100..100 maps to columns/rows 0..4
     led.plot(Math.round(rcPad.joystick("L", rcPad.Axis.X) / 50) + 2, 2 - Math.round(rcPad.joystick("L", rcPad.Axis.Y) / 50))
 })

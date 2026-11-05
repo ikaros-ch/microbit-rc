@@ -16,9 +16,13 @@ basic.forever(function () {
     rcPad.show("temp", input.temperature())
     // EXPECT: "temp" display shows the micro:bit temperature in °C
     // EXPECT: toggle T1 switches the "msg" text between "lights ON" and "lights off"
-    rcPad.showText("msg", rcPad.isOn("T1") ? "lights ON" : "lights off")
+    if (rcPad.isOn("T1")) {
+        rcPad.showText("msg", "lights ON")
+    } else {
+        rcPad.showText("msg", "lights off")
+    }
     if (rcPad.isOn("A")) {
-        basic.showIcon(IconNames.Heart, 0)
+        basic.showIcon(IconNames.Heart)
         // EXPECT: heart while button A is held
     } else {
         basic.clearScreen()

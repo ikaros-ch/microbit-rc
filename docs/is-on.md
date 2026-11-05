@@ -16,7 +16,11 @@ Turn on pin P1 (an LED, for example) while toggle T1 is on.
 
 ```blocks
 basic.forever(function () {
-    pins.digitalWritePin(DigitalPin.P1, rcPad.isOn("T1") ? 1 : 0)
+    if (rcPad.isOn("T1")) {
+        pins.digitalWritePin(DigitalPin.P1, 1)
+    } else {
+        pins.digitalWritePin(DigitalPin.P1, 0)
+    }
 })
 ```
 
