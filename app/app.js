@@ -13,12 +13,15 @@ const STORE = 'rcpad.layout';
 const defaults = () => ({ widgets: [
   { type: 'toggle', id: 'T1', label: t('lights'), x: 2, y: 2, w: 11, h: 18, bind: ['Digit1', 'pad:b4'] },
   { type: 'display', channel: 'msg', label: t('status'), mode: 'text', x: 38, y: 3, w: 28, h: 18 },
+  { type: 'display', channel: 'speed', label: t('speedLbl'), mode: 'bar', min: 0, max: 100, x: 15, y: 3, w: 21, h: 18 },
+  { type: 'display', channel: 'temp', label: t('temp'), mode: 'graph', min: 0, max: 40, unit: '°C', x: 68, y: 3, w: 19, h: 18 },
   { type: 'toggle', id: 'T2', label: 'Turbo', x: 88.5, y: 1.5, w: 11, h: 18, bind: ['Digit2', 'pad:b5'] },
   { type: 'joystick', id: 'L', x: 2, y: 30, w: 24, h: 66, up: ['KeyW', 'pad:a1-'], down: ['KeyS', 'pad:a1+'], left: ['KeyA', 'pad:a0-'], right: ['KeyD', 'pad:a0+'] },
   { type: 'slider', id: 'S', label: t('throttle'), color: '#ff9f43', x: 46, y: 30.5, w: 7, h: 66, up: ['KeyR', 'pad:b7'], down: ['KeyF', 'pad:b6'], speed: 100 },
   { type: 'button', id: 'Y', color: '#f6c343', x: 76, y: 32, w: 10, h: 19, bind: ['KeyI', 'pad:b3'] },
   { type: 'button', id: 'X', color: '#00c2ff', x: 65, y: 53, w: 10, h: 19, bind: ['KeyJ', 'pad:b2'] },
   { type: 'button', id: 'B', color: '#ff5c7a', x: 87, y: 53, w: 10, h: 19, bind: ['KeyL', 'pad:b1'] },
+  { type: 'display', channel: 'lamp', label: 'B', mode: 'lamp', x: 88, y: 76, w: 9, h: 17 },
   { type: 'button', id: 'A', color: '#3ddc84', x: 76, y: 74, w: 10, h: 19, bind: ['Space', 'pad:b0'] },
 ] });
 
