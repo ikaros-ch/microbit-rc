@@ -34,34 +34,17 @@ It has two parts:
 2. Go to **Extensions** and paste `https://github.com/ikaros-ch/microbit-rc`.
 3. Accept that the extension removes `radio`, because Bluetooth and radio can't run together.
 
-```blocks
-// Show a heart when button widget "A" in the app is pressed
-rcPad.onButton("A", rcPad.ButtonEvent.Pressed, function () {
-    basic.showIcon(IconNames.Heart)
-})
-basic.forever(function () {
-    // Send slider "S" back to the app's "speed" display
-    rcPad.show("speed", rcPad.value("S"))
-    // Show a text on the "msg" display, depending on toggle "T1"
-    if (rcPad.isOn("T1")) {
-        rcPad.showText("msg", "lights ON")
-    } else {
-        rcPad.showText("msg", "lights off")
-    }
-    // Move one LED with joystick "L": -100..100 maps to columns/rows 0..4
-    led.plot(Math.round(rcPad.joystick("L", rcPad.Axis.X) / 50) + 2, 2 - Math.round(rcPad.joystick("L", rcPad.Axis.Y) / 50))
-})
-```
+### Blocks
 
 | Block | What it does |
 |---|---|
-| [`on rc pad button "A" pressed/released`](docs/on-button.md) | runs when a button widget goes down or up |
-| [`on rc pad "S" changed`](docs/on-change.md) | runs when any widget with that ID changes |
-| [`rc pad "T1" is on`](docs/is-on.md) | true while a button is held or a toggle is on |
-| [`rc pad "S" value`](docs/value.md) | slider 0–100, single-axis stick -100..100 (0/1 for buttons and toggles) |
-| [`rc pad joystick "L" x/y`](docs/joystick.md) | -100..100, right and up are positive |
-| [`rc pad display "speed" show 42`](docs/show.md) | shows a number on every display widget set to channel `speed` |
-| [`rc pad display "msg" show text "hi"`](docs/show-text.md) | shows text the same way |
+| [<img src="docs/images/block-on-button.png" width="322" alt="on rc pad button pressed/released">](docs/on-button.md) | runs when a button widget goes down or up |
+| [<img src="docs/images/block-on-change.png" width="225" alt="on rc pad changed">](docs/on-change.md) | runs when any widget with that ID changes |
+| [<img src="docs/images/block-is-on.png" width="208" alt="rc pad is on">](docs/is-on.md) | true while a button is held or a toggle is on |
+| [<img src="docs/images/block-value.png" width="189" alt="rc pad value">](docs/value.md) | slider 0–100, single-axis stick -100..100 (0/1 for buttons and toggles) |
+| [<img src="docs/images/block-joystick.png" width="269" alt="rc pad joystick">](docs/joystick.md) | -100..100, right and up are positive |
+| [<img src="docs/images/block-show.png" width="322" alt="rc pad display show">](docs/show.md) | shows a number on every display widget set to that channel |
+| [<img src="docs/images/block-show-text.png" width="362" alt="rc pad display show text">](docs/show-text.md) | shows text the same way |
 
 The micro:bit sends display values at most every 100 ms and resends all of them every 2 s, so you can call `show` in a fast `forever` loop.
 
@@ -73,6 +56,109 @@ A demo `.hex` that matches the app's default layout is attached to each [release
 * The extension uses the Bluetooth UART receive handler, so don't add your own `on bluetooth data received` block.
 * IDs and channel names can only use English letters, digits and `_`, with at most 8 characters.
 * Texts can be any length, but only English letters, digits and symbols: MakeCode for micro:bit can't store Greek or other non-English letters in text. Long texts are split into 20-byte Bluetooth packets, which the app joins back together.
+
+## Examples
+
+Each example uses the widget IDs of the app's default layout.
+
+### Heart on a button
+
+Show a heart while button **A** is held.
+
+<img src="docs/images/example-heart.png" width="748" alt="Heart on a button blocks">
+
+<details><summary>Show code</summary>
+
+```blocks
+// Show a heart while button A is held
+rcPad.onButton("A", rcPad.ButtonEvent.Pressed, function () {
+    basic.showIcon(IconNames.Heart)
+})
+// Clear the screen when A is released
+rcPad.onButton("A", rcPad.ButtonEvent.Released, function () {
+    basic.clearScreen()
+})
+```
+
+</details>
+
+### Light switch
+
+Toggle **T1** turns a light (an LED with a resistor) on pin P1 on and off, and shows the state on the app's **msg** display.
+
+<img src="docs/images/example-lights.png" width="465" alt="Light switch blocks">
+
+<details><summary>Show code</summary>
+
+```blocks
+basic.forever(function () {
+    // Toggle T1 switches a light on pin P1 and tells the app
+    if (rcPad.isOn("T1")) {
+        pins.digitalWritePin(DigitalPin.P1, 1)
+        rcPad.showText("msg", "lights ON")
+    } else {
+        pins.digitalWritePin(DigitalPin.P1, 0)
+        rcPad.showText("msg", "lights off")
+    }
+})
+```
+
+</details>
+
+### Servo on a slider
+
+Slider **S** turns a servo on pin P0, and the **speed** display shows its position.
+
+<img src="docs/images/example-servo.png" width="693" alt="Servo on a slider blocks">
+
+<details><summary>Show code</summary>
+
+```blocks
+// Slider S (0-100) turns a servo on P0 (0-180 degrees)
+rcPad.onChange("S", function () {
+    pins.servoWritePin(AnalogPin.P0, rcPad.value("S") * 180 / 100)
+    // Show the position on the app's "speed" display
+    rcPad.show("speed", rcPad.value("S"))
+})
+```
+
+</details>
+
+### Joystick dot
+
+Joystick **L** moves one LED around the screen.
+
+<img src="docs/images/example-joystick.png" width="800" alt="Joystick dot blocks">
+
+<details><summary>Show code</summary>
+
+```blocks
+basic.forever(function () {
+    basic.clearScreen()
+    // Joystick L moves one LED: -100..100 maps to columns and rows 0..4
+    led.plot(Math.round(rcPad.joystick("L", rcPad.Axis.X) / 50) + 2, 2 - Math.round(rcPad.joystick("L", rcPad.Axis.Y) / 50))
+})
+```
+
+</details>
+
+### Temperature display
+
+Send the micro:bit temperature to the app's **temp** display once a second.
+
+<img src="docs/images/example-temperature.png" width="477" alt="Temperature display blocks">
+
+<details><summary>Show code</summary>
+
+```blocks
+basic.forever(function () {
+    // Send the temperature to the app's "temp" display
+    rcPad.show("temp", input.temperature())
+    basic.pause(1000)
+})
+```
+
+</details>
 
 ## Android app
 
