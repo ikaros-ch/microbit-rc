@@ -100,9 +100,14 @@ button:hover, .btn:hover { border-color: var(--mut); }
 
 #panel {
   position: fixed; z-index: 6; right: 10px; top: calc(56px + env(safe-area-inset-top, 0px)); bottom: 10px;
-  width: min(300px, calc(100vw - 20px)); overflow: auto; padding: 12px;
+  width: min(300px, 42%); overflow: auto; padding: 12px;
   background: var(--panel); border: 1px solid var(--line); border-radius: 12px; user-select: text;
 }
+#panel[data-side=left] { right: auto; left: 10px; }
+#panel[data-side=top], #panel[data-side=bottom] { left: 10px; width: auto; height: 42%; }
+#panel[data-side=top] { bottom: auto; }
+#panel[data-side=bottom] { top: auto; }
+#panel.away { visibility: hidden; }
 #panel h3 { margin: 0 0 10px; display: flex; justify-content: space-between; align-items: center; text-transform: capitalize; }
 .row { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
 .row > span { color: var(--mut); font-size: 12px; }

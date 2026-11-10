@@ -221,6 +221,7 @@ function drag(ev, w, e) {
   const [ox, oy] = toLocal(ev.clientX, ev.clientY), start = { ...w };
   const snap = v => Math.round(v * 2) / 2;
   e.setPointerCapture(ev.pointerId);
+  panel.classList.add('away'); // hide the panel while dragging so it never covers the widget
   e.onpointermove = m => {
     const [mx, my] = toLocal(m.clientX, m.clientY);
     const dx = (mx - ox) / r.width * 100, dy = (my - oy) / r.height * 100;
@@ -233,7 +234,7 @@ function drag(ev, w, e) {
     }
     place(e, w);
   };
-  e.onpointerup = () => { e.onpointermove = null; save(); render(); };
+  e.onpointerup = e.onpointercancel = () => { e.onpointermove = null; panel.classList.remove('away'); save(); render(); renderPanel(); };
 }
 
 function select(w) {
@@ -273,6 +274,10 @@ function renderPanel() {
   panel.hidden = !editing || !selected;
   if (panel.hidden) return;
   const w = selected;
+  // Open on the side away from the widget: left/right on wide screens, top/bottom on tall ones.
+  panel.dataset.side = root.offsetWidth >= root.offsetHeight
+    ? (w.x + w.w / 2 > 50 ? 'left' : 'right')
+    : (w.y + w.h / 2 > 50 ? 'top' : 'bottom');
   panel.replaceChildren();
   const h = el('h3', null, t(w.type));
   const close = el('button', null, '✕');
