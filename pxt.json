@@ -1,6 +1,6 @@
 {
     "name": "microbit-rc",
-    "version": "2.0.3",
+    "version": "2.0.4",
     "description": "Customizable Bluetooth gamepad for micro:bit: buttons, joysticks, toggles, sliders and displays from the RC Pad web app",
     "license": "MIT",
     "dependencies": {
@@ -18,7 +18,9 @@
         "docs/show.md",
         "docs/value.md",
         "_locales/el/microbit-rc-jsdoc-strings.json",
-        "_locales/el/microbit-rc-strings.json"
+        "_locales/el/microbit-rc-strings.json",
+        "rc-pad-tutorial.md",
+        "_locales/el/rc-pad-tutorial.md"
     ],
     "testFiles": [
         "test.ts"

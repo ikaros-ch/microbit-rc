@@ -198,6 +198,7 @@ Pushing to `main` deploys `app/` to GitHub Pages.
 
 ## Learn more
 
+* **[Tutorial: Drive your micro:bit with your phone](https://makecode.microbit.org/#tutorial:https://github.com/ikaros-ch/microbit-rc/rc-pad-tutorial)**: a step-by-step guide inside MakeCode (also in Greek)
 * [Bluetooth pairing on the micro:bit](https://makecode.microbit.org/reference/bluetooth/bluetooth-pairing)
 * [MakeCode Bluetooth UART reference](https://makecode.microbit.org/reference/bluetooth/start-uart-service)
 * [MakeCode events and handlers](https://makecode.microbit.org/blocks/on-start)
