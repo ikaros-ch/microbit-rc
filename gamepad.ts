@@ -96,7 +96,8 @@ namespace rcPad {
 
     let started = false
 
-    // Start Bluetooth and the send loop on the first block call, not at load.
+    // Start Bluetooth and the send loop. Runs at program start (bottom of this file),
+    // so the app can connect even if no RC Pad block has run yet.
     function init() {
         if (started) return
         started = true
@@ -204,4 +205,6 @@ namespace rcPad {
         init()
         put(channel, text.split("\n").join(" "))
     }
+
+    init()
 }
