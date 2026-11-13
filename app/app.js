@@ -431,9 +431,22 @@ addEventListener('resize', render);
 
 async function connect() {
   if (!navigator.bluetooth) return alert(t('noBt'));
-  device = await navigator.bluetooth.requestDevice({ filters: [{ namePrefix: 'BBC micro:bit' }], optionalServices: [UART] });
+  try {
+    device = await navigator.bluetooth.requestDevice({ filters: [{ namePrefix: 'BBC micro:bit' }], optionalServices: [UART] });
+  } catch (e) {
+    if (e.name === 'NotFoundError') return; // chooser closed without picking a device
+    throw e;
+  }
   device.addEventListener('gattserverdisconnected', disconnected);
-  const svc = await (await device.gatt.connect()).getPrimaryService(UART);
+  const server = await device.gatt.connect();
+  let svc;
+  try {
+    svc = await server.getPrimaryService(UART);
+  } catch {
+    // Android sometimes needs a moment to discover services right after connecting.
+    await new Promise(r => setTimeout(r, 1000));
+    try { svc = await server.getPrimaryService(UART); } catch { server.disconnect(); throw new Error(t('noUart')); }
+  }
   const tx = await svc.getCharacteristic(UART_TX);
   tx.addEventListener('characteristicvaluechanged', e => receive(decoder.decode(e.target.value, { stream: true })));
   await tx.startNotifications();
@@ -454,7 +467,7 @@ function disconnected() {
 }
 $('#connect').onclick = async () => {
   if (device?.gatt.connected) return device.gatt.disconnect();
-  try { await connect(); } catch (e) { if (e.name !== 'NotFoundError') alert(t('connectFail') + e.message); disconnected(); }
+  try { await connect(); } catch (e) { alert(t('connectFail') + e.message); disconnected(); }
 };
 
 function receive(text) {

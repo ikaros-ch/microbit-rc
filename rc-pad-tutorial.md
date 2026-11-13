@@ -8,6 +8,8 @@ Turn a phone, tablet or computer into a remote control for your micro:bit!
 
 You will use the free **RC Pad** app (https://ikaros-ch.github.io/microbit-rc/) and the ``||rcPad:RC Pad||`` blocks. The app talks to the micro:bit over Bluetooth, so you don't need a second micro:bit.
 
+If MakeCode says **radio** and **bluetooth** can't be used together, click **Remove radio**.
+
 ## A heart button
 
 Open the ``||rcPad:RC Pad||`` category and drag an ``||rcPad:on rc pad button "A" pressed||`` block into the workspace.

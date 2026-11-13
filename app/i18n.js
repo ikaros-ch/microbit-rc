@@ -45,6 +45,8 @@ const STR = {
   importFail: ['Could not import layout: ', 'Αποτυχία εισαγωγής διάταξης: '],
   noBt: ['This browser has no Web Bluetooth. Use Chrome or Edge (desktop or Android).', 'Αυτός ο browser δεν υποστηρίζει Web Bluetooth. Χρησιμοποίησε Chrome ή Edge (υπολογιστή ή Android).'],
   connectFail: ['Could not connect: ', 'Αποτυχία σύνδεσης: '],
+  noUart: ['this micro:bit is not running an RC Pad program. Flash a MakeCode program that uses RC Pad blocks, made with Project Settings → No Pairing Required.',
+    'αυτό το micro:bit δεν τρέχει πρόγραμμα RC Pad. Φόρτωσε πρόγραμμα MakeCode με μπλοκ RC Pad, φτιαγμένο με Project Settings → No Pairing Required.'],
   // default layout labels
   lights: ['Lights', 'Φώτα'],
   status: ['Status', 'Κατάσταση'],
