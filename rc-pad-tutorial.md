@@ -86,7 +86,7 @@ basic.forever(function () {
 
 ## Bluetooth setting @showdialog
 
-Before you download, click the **gear** (top right) → **Project Settings**, select **No Pairing Required**, and click **Save**.
+Before you download, click the **gear** (top right) → **Project Settings**, and select **No Pairing Required**. Then go back to your blocks; the setting is saved by itself.
 
 Without this setting the app connects, but the micro:bit ignores the buttons.
 

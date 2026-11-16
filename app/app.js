@@ -150,6 +150,12 @@ function paint(w, s, v) {
   if (w.type === 'joystick') e.querySelector('.knob').style.transform = `translate(${v[0] * 0.69}%, ${-v[1] * 0.69}%)`;
 }
 
+// Shrink the font until the content fits its box.
+function fit(e) {
+  e.style.fontSize = '';
+  let px = parseFloat(getComputedStyle(e).fontSize);
+  while (px > 8 && (e.scrollWidth > e.clientWidth || e.scrollHeight > e.clientHeight)) e.style.fontSize = --px + 'px';
+}
 function paintDisplay(w) {
   const e = state(w).el?.querySelector('.val');
   if (!e) return;
@@ -178,6 +184,7 @@ function paintDisplay(w) {
     e.title = text;
     e.replaceChildren(svg);
   } else e.textContent = text;
+  if (w.mode !== 'lamp' && w.mode !== 'graph') fit(e);
 }
 
 /* ---------- touch input (play mode) ---------- */
@@ -443,9 +450,12 @@ async function connect() {
   try {
     svc = await server.getPrimaryService(UART);
   } catch {
-    // Android sometimes needs a moment to discover services right after connecting.
+    // Some systems need a moment to discover services right after connecting.
     await new Promise(r => setTimeout(r, 1000));
-    try { svc = await server.getPrimaryService(UART); } catch { server.disconnect(); throw new Error(t('noUart')); }
+    try {
+      if (!server.connected) await device.gatt.connect(); // Windows sometimes drops the first connection
+      svc = await server.getPrimaryService(UART);
+    } catch { server.disconnect(); throw new Error(t('noUart')); }
   }
   const tx = await svc.getCharacteristic(UART_TX);
   tx.addEventListener('characteristicvaluechanged', e => receive(decoder.decode(e.target.value, { stream: true })));

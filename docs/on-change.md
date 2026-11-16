@@ -7,6 +7,8 @@ rcPad.onChange("S", function () {
 })
 ```
 
+If the value changes again while your code is still running (for example during a `pause` or a tone), the code runs once more with the newest value, not once for every change.
+
 ## Parameters
 
 * **id**: the widget ID set in the app, like `"S"`

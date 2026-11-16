@@ -1,7 +1,7 @@
 {
     "name": "microbit-rc",
-    "version": "2.0.6",
-    "description": "Customizable Bluetooth gamepad for micro:bit: buttons, joysticks, toggles, sliders and displays from the RC Pad web app",
+    "version": "2.1.0",
+    "description": "Control a micro:bit over Bluetooth from the RC Pad gamepad app",
     "license": "MIT",
     "dependencies": {
         "core": "*",
@@ -29,15 +29,5 @@
         "microbit"
     ],
     "preferredEditor": "blocksprj",
-    "yotta": {
-        "config": {
-            "microbit-dal": {
-                "bluetooth": {
-                    "open": 1,
-                    "whitelist": 0,
-                    "security_level": null
-                }
-            }
-        }
-    }
+    "public": true
 }

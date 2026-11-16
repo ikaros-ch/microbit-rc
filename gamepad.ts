@@ -34,6 +34,7 @@ namespace rcPad {
     let ids: string[] = []
     let xs: number[] = []
     let ys: number[] = []
+    let vers: number[] = [] // bumped on every change, see onChange
 
     function find(list: string[], key: string): number {
         for (let i = 0; i < list.length; i++) if (list[i] == key) return i
@@ -46,6 +47,7 @@ namespace rcPad {
             ids.push(id)
             xs.push(0)
             ys.push(0)
+            vers.push(0)
             i = ids.length - 1
         }
         return i
@@ -64,6 +66,7 @@ namespace rcPad {
         if (x == xs[i] && y == ys[i]) return
         xs[i] = x
         ys[i] = y
+        vers[i]++
         if (kind == "B") control.raiseEvent(x ? EVT_DOWN : EVT_UP, i + 1)
         control.raiseEvent(EVT_CHANGE, i + 1)
     }
@@ -124,8 +127,10 @@ namespace rcPad {
     /**
      * Run code when a button in the app is pressed or released.
      * @param id the widget ID set in the app, eg: "A"
+     * @param event pressed (the button goes down) or released (it comes back up)
+     * @param handler the code to run
      */
-    //% blockId=gamepad_on_button block="on rc pad button $id $event"
+    //% blockId=rcpad_on_button block="on rc pad button $id $event"
     //% id.defl="A" group="Inputs" weight=100
     //% help=github:microbit-rc/docs/on-button
     export function onButton(id: string, event: ButtonEvent, handler: () => void) {
@@ -135,21 +140,33 @@ namespace rcPad {
 
     /**
      * Run code when any widget (button, toggle, slider, joystick) changes value.
+     * If the value changes again while the code is still running, the code runs
+     * once more with the newest value instead of once per change.
      * @param id the widget ID set in the app, eg: "S"
+     * @param handler the code to run
      */
-    //% blockId=gamepad_on_change block="on rc pad $id changed"
+    //% blockId=rcpad_on_change block="on rc pad $id changed"
     //% id.defl="S" group="Inputs" weight=90
     //% help=github:microbit-rc/docs/on-change
     export function onChange(id: string, handler: () => void) {
         init()
-        control.onEvent(EVT_CHANGE, index(id) + 1, handler)
+        const i = index(id)
+        // Changes that arrive while the handler runs are dropped, not queued;
+        // the loop then runs it once more so it always sees the newest value.
+        control.onEvent(EVT_CHANGE, i + 1, function () {
+            let seen = 0
+            do {
+                seen = vers[i]
+                handler()
+            } while (seen != vers[i])
+        }, EventFlags.DropIfBusy)
     }
 
     /**
      * True while a button is held, or while a toggle switch is on.
      * @param id the widget ID set in the app, eg: "T1"
      */
-    //% blockId=gamepad_is_on block="rc pad $id is on"
+    //% blockId=rcpad_is_on block="rc pad $id is on"
     //% id.defl="T1" group="Inputs" weight=80
     //% help=github:microbit-rc/docs/is-on
     export function isOn(id: string): boolean {
@@ -161,7 +178,7 @@ namespace rcPad {
      * Slider position 0..100, single-axis stick -100..100 (up/right positive), or 0/1 for buttons and toggles.
      * @param id the widget ID set in the app, eg: "S"
      */
-    //% blockId=gamepad_value block="rc pad $id value"
+    //% blockId=rcpad_value block="rc pad $id value"
     //% id.defl="S" group="Inputs" weight=70
     //% help=github:microbit-rc/docs/value
     export function value(id: string): number {
@@ -172,8 +189,9 @@ namespace rcPad {
     /**
      * Joystick position on one axis, -100..100 (right and up are positive).
      * @param id the widget ID set in the app, eg: "L"
+     * @param axis x for left/right, y for down/up
      */
-    //% blockId=gamepad_joystick block="rc pad joystick $id $axis"
+    //% blockId=rcpad_joystick block="rc pad joystick $id $axis"
     //% id.defl="L" group="Inputs" weight=60
     //% help=github:microbit-rc/docs/joystick
     export function joystick(id: string, axis: Axis): number {
@@ -185,8 +203,9 @@ namespace rcPad {
     /**
      * Show a number on every display widget bound to this channel.
      * @param channel the display channel set in the app, eg: "speed"
+     * @param value the number to show
      */
-    //% blockId=gamepad_show block="rc pad display $channel show $value"
+    //% blockId=rcpad_show block="rc pad display $channel show $value"
     //% channel.defl="speed" group="Display" weight=50
     //% help=github:microbit-rc/docs/show
     export function show(channel: string, value: number) {
@@ -197,8 +216,9 @@ namespace rcPad {
     /**
      * Show text (English letters only) on every display widget bound to this channel.
      * @param channel the display channel set in the app, eg: "msg"
+     * @param text the text to show
      */
-    //% blockId=gamepad_show_text block="rc pad display $channel show text $text"
+    //% blockId=rcpad_show_text block="rc pad display $channel show text $text"
     //% channel.defl="msg" group="Display" weight=40
     //% help=github:microbit-rc/docs/show-text
     export function showText(channel: string, text: string) {
